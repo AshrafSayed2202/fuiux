@@ -1,10 +1,10 @@
-import MyComponent from './assets/MyComponent.jsx'
+import HeroSection from './components/HeroSection.jsx'
 
 function App() {
 
   return (
     <>
-      <MyComponent />
+      <HeroSection />
     </>
   )
 }
