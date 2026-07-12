@@ -1,4 +1,4 @@
-import HeroSection from './components/HeroSection.jsx'
+import HeroSection from './ui/HeroBg.jsx'
 import Nav from './components/Nav.jsx'
 
 function App() {
