@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 
-import topImage from "../assets/images/charcter-1.jpg";
-import revealImage from "../assets/images/charcter-2.jpg";
+import topBg from "../assets/images/top-background.jpg";
+import topChar from "../assets/images/charcter-1.png";
+import bottomBg from "../assets/images/bottom-background.jpg";
+import bottomChar from "../assets/images/charcter-2.png";
 
 export default function HeroBg() {
   const canvasRef = useRef(null);
@@ -12,8 +14,10 @@ export default function HeroBg() {
     const ctx = canvas.getContext("2d", { willReadFrequently: false });
     const container = containerRef.current;
 
-    const topImg = new Image();
-    const bottomImg = new Image();
+    const topBgImg = new Image();
+    const topCharImg = new Image();
+    const bottomBgImg = new Image();
+    const bottomCharImg = new Image();
 
     const particles = [];
     const trailPoints = [];
@@ -115,11 +119,11 @@ export default function HeroBg() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.globalCompositeOperation = "source-over";
-      ctx.drawImage(topImg, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(topBgImg, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(topCharImg, 0, 0, canvas.width, canvas.height);
 
       ctx.globalCompositeOperation = "destination-out";
 
-      // Trail + Particles (unchanged for now)
       for (let i = trailPoints.length - 1; i >= 0; i--) {
         const p = trailPoints[i];
         p.life -= params.dissipation * dt * 1.05;
@@ -171,7 +175,6 @@ export default function HeroBg() {
       const normalizedX = (newX - centerX) / centerX;
       const normalizedY = (newY - centerY) / centerY;
 
-      // Lighter tilt
       mouse.targetTiltY = normalizedX * params.tiltMax * 0.65;
       mouse.targetTiltX = -normalizedY * params.tiltMax * 0.65;
 
@@ -193,17 +196,21 @@ export default function HeroBg() {
     let loaded = 0;
     function imageLoaded() {
       loaded++;
-      if (loaded === 2) {
+      if (loaded === 4) {
         resize();
         animate(0);
       }
     }
 
-    topImg.onload = imageLoaded;
-    bottomImg.onload = imageLoaded;
+    topBgImg.onload = imageLoaded;
+    topCharImg.onload = imageLoaded;
+    bottomBgImg.onload = imageLoaded;
+    bottomCharImg.onload = imageLoaded;
 
-    topImg.src = topImage;
-    bottomImg.src = revealImage;
+    topBgImg.src = topBg;
+    topCharImg.src = topChar;
+    bottomBgImg.src = bottomBg;
+    bottomCharImg.src = bottomChar;
 
     canvas.addEventListener("mousemove", handleMove);
 
@@ -233,7 +240,13 @@ export default function HeroBg() {
       }}
     >
       <img
-        src={revealImage}
+        src={bottomBg}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover pointer-events-none"
+        draggable={false}
+      />
+      <img
+        src={bottomChar}
         alt=""
         className="absolute inset-0 h-full w-full object-cover pointer-events-none"
         draggable={false}
@@ -243,6 +256,7 @@ export default function HeroBg() {
         ref={canvasRef}
         className="absolute inset-0 h-full w-full"
       />
+
     </div>
   );
 }
