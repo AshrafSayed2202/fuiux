@@ -1,14 +1,23 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, useTransform } from "framer-motion";
 
 import topBg from "../assets/images/top-background.jpg";
 import topChar from "../assets/images/charcter-1.png";
 import bottomBg from "../assets/images/bottom-background.jpg";
 import bottomChar from "../assets/images/charcter-2.png";
 
-export default function HeroBg() {
+export default function HeroBg({ mouseEnabled, scrollYProgress }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
+  const [isMouseActive, setIsMouseActive] = useState(true);
 
+  useEffect(() => {
+    const unsubscribe = mouseEnabled.on("change", (value) => {
+      setIsMouseActive(value > 0.5);
+    });
+    return () => unsubscribe();
+  }, [mouseEnabled]);
+  const characterScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.5]);
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d", { willReadFrequently: false });
@@ -48,11 +57,10 @@ export default function HeroBg() {
       chromatic: 65,
       momentum: 0.65,
 
-      // === LIGHTER 3D SETTINGS ===
-      tiltMax: 7,           // was 18 → much lighter
-      tiltSpeed: 0.11,      // smoother following
-      perspective: 1600,    // higher = flatter, less 3D
-      shineIntensity: 0.4,  // reduced shine
+      tiltMax: 7,
+      tiltSpeed: 0.11,
+      perspective: 1600,
+      shineIntensity: 0.4,
     };
 
     function resize() {
@@ -96,7 +104,7 @@ export default function HeroBg() {
     }
 
     const updateTilt = () => {
-      if (!container) return;
+      if (!container || !isMouseActive) return;
 
       mouse.currentTiltX = mouse.currentTiltX * 0.9 + mouse.targetTiltX * 0.1;
       mouse.currentTiltY = mouse.currentTiltY * 0.9 + mouse.targetTiltY * 0.1;
@@ -157,6 +165,8 @@ export default function HeroBg() {
     }
 
     function handleMove(e) {
+      if (!isMouseActive) return;
+
       const rect = canvas.getBoundingClientRect();
       const newX = e.clientX - rect.left;
       const newY = e.clientY - rect.top;
@@ -228,35 +238,35 @@ export default function HeroBg() {
       canvas.removeEventListener("mousemove", handleMove);
       window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, [isMouseActive]);
 
   return (
     <div
       ref={containerRef}
-      className="relative h-screen w-full overflow-hidden transition-transform duration-100 ease-out scale-[1.1]"
+      className="relative h-full w-full overflow-hidden"
       style={{
         transformStyle: "preserve-3d",
         willChange: "transform"
       }}
     >
-      <img
+      <motion.img
         src={bottomBg}
         alt=""
         className="absolute inset-0 h-full w-full object-cover pointer-events-none"
         draggable={false}
       />
-      <img
+      <motion.img
         src={bottomChar}
         alt=""
         className="absolute inset-0 h-full w-full object-cover pointer-events-none"
         draggable={false}
       />
 
-      <canvas
+      <motion.canvas
         ref={canvasRef}
         className="absolute inset-0 h-full w-full"
+        style={{ scale: characterScale }}
       />
-
     </div>
   );
 }
