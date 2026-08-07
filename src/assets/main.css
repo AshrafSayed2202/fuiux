@@ -2,3 +2,6 @@
 @theme {
     --font-orbitron: "Orbitron", sans-serif;
 }
+.container {
+    @apply mx-auto w-full max-w-360 px-4 sm:px-6 lg:px-8;
+}

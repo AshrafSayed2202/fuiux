@@ -5,20 +5,11 @@
 body {
     background-color: #0D0B0B;
 }
-.container {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-}
-
-.container img,
-.container canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.container canvas {
-  cursor: crosshair;
+.neon-text {
+  color: rgba(70, 8, 9, 0.40);
+  text-shadow: 0 0 20px rgba(255, 0, 51, 0.25);
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: #F03;
+  line-height: normal;
+  letter-spacing: -1.6px;
 }
