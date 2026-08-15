@@ -4,8 +4,9 @@ import Header from "../ui/Header"
 
 const AboutSection = () => {
   return (
-    <div className="bg-[#0A0A0A] py-46">
-
+    <div className="bg-[#0A0A0A] py-46 relative">
+      <div className="w-175 h-100 bg-[#C100071A] rounded-full blur-[100px] absolute -top-15" />
+      <div className="w-100 h-100 bg-[#82181A14] rounded-full blur-[120px] absolute bottom-0 right-0" />
       <div className="relative w-full flex container flex-col gap-7.5">
         <Header header="About me" />
         <div className="flex gap-35">
