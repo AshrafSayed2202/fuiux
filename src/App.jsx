@@ -1,21 +1,36 @@
-import AboutSection from './components/AboutSection.jsx'
-import HeroSection from './components/HeroSection.jsx'
-import Nav from './components/Nav.jsx'
-import ProjectsSection from './components/ProjectsSection.jsx'
-import TitlesSection from './components/TitlesSection.jsx'
-import ToolsSection from './components/ToolsSection.jsx'
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import AboutSection from "./components/AboutSection.jsx"
+import HeroSection from "./components/HeroSection.jsx"
+import Nav from "./components/Nav.jsx"
+import ProjectsSection from "./components/ProjectsSection.jsx"
+import TitlesSection from "./components/TitlesSection.jsx"
+import ToolsSection from "./components/ToolsSection.jsx"
+import PricingSection from "./components/PricingSection.jsx"
 
-function App() {
-
+function HomePage() {
   return (
-    <main className="relative w-full">
-      <Nav />
+    <>
       <HeroSection />
       <TitlesSection />
       <AboutSection />
       <ToolsSection />
       <ProjectsSection />
-    </main>
+      <PricingSection />
+    </>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <main className="relative w-full">
+        <Nav />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/projects" element={<ProjectsSection />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   )
 }
 

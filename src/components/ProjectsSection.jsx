@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import CardBorders from "../ui/CardBorders"
 import Header from "../ui/Header"
 
@@ -8,112 +9,96 @@ const PROJECTS = [
     image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
     category: "Fintech Dashboard",
     title: "Nova Banking Console",
-    labels: ["Fintech Dashboard", "Web Design"],
   },
   {
     id: 2,
     image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1600&q=80",
     category: "Mobile App",
     title: "Pulse Fitness Companion",
-    labels: ["Mobile App"],
   },
   {
     id: 3,
     image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=80",
     category: "Games",
     title: "Arcade Night Multiplayer",
-    labels: ["Games"],
   },
   {
     id: 4,
     image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1600&q=80",
     category: "Brand Identity",
     title: "Lumen Visual System",
-    labels: ["Brand Identity"],
   },
   {
     id: 5,
     image: "https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=1600&q=80",
     category: "Web Design",
     title: "Ember Studio Website",
-    labels: ["Web Design", "Brand Identity"],
   },
   {
     id: 6,
     image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1600&q=80",
     category: "Car Infotainment Design",
     title: "Horizon EV Cockpit",
-    labels: ["Car Infotainment Design"],
   },
   {
     id: 7,
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80",
     category: "Fintech Dashboard",
     title: "Vault Crypto Ledger",
-    labels: ["Fintech Dashboard", "Web Design"],
   },
   {
     id: 8,
     image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1600&q=80",
     category: "Mobile App",
     title: "Atlas Travel Planner",
-    labels: ["Mobile App", "Web Design"],
   },
   {
     id: 9,
     image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=1600&q=80",
     category: "Games",
     title: "Neon Racer Circuit",
-    labels: ["Games", "Car Infotainment Design"],
   },
   {
     id: 10,
     image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?auto=format&fit=crop&w=1600&q=80",
     category: "Brand Identity",
     title: "Meridian Identity Kit",
-    labels: ["Brand Identity", "Web Design"],
   },
   {
     id: 11,
     image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1600&q=80",
     category: "Web Design",
     title: "Apex Commerce Platform",
-    labels: ["Web Design"],
   },
   {
     id: 12,
     image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80",
     category: "Car Infotainment Design",
     title: "Orion Cluster Interface",
-    labels: ["Car Infotainment Design", "Mobile App"],
   },
   {
     id: 13,
     image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1600&q=80",
     category: "Fintech Dashboard",
     title: "Flow Payments Hub",
-    labels: ["Fintech Dashboard"],
   },
   {
     id: 14,
     image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=80",
     category: "Games",
     title: "Drift League UI",
-    labels: ["Games", "Car Infotainment Design"],
   },
   {
     id: 15,
     image: "https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1600&q=80",
     category: "Brand Identity",
     title: "Craft & Co Brand World",
-    labels: ["Brand Identity"],
   },
   {
     id: 16,
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80",
     category: "Mobile App",
     title: "Ledger Pro Wallet",
-    labels: ["Mobile App", "Fintech Dashboard"],
   },
 ]
 
@@ -129,20 +114,17 @@ const FILTERS = [
 
 const PAGE_SIZE = 4
 
-const fetchProjects = (filters, page) => {
+const fetchProjects = (filters) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const isAll = filters.length === 1 && filters[0] === "All"
       const filtered = isAll
         ? PROJECTS
-        : PROJECTS.filter((project) =>
-          project.labels.some((label) => filters.includes(label))
-        )
-      const start = (page - 1) * PAGE_SIZE
-      const items = filtered.slice(start, start + PAGE_SIZE)
+        : PROJECTS.filter((project) => filters.includes(project.category))
+      const items = filtered.slice(0, PAGE_SIZE)
       resolve({
         items,
-        hasMore: start + items.length < filtered.length,
+        hasMore: items.length < filtered.length,
       })
     }, 450)
   })
@@ -153,9 +135,9 @@ const FilterButton = ({ text, isActive, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className={`py-2 rounded-lg text-[12px] border flex-1 relative overflow-hidden group ${isActive
-          ? "bg-[#ff00331a] text-[#FF0033] border-transparent"
-          : "bg-[#ffffff08] text-[#ffffff80] border-[#ffffff14]"
+      className={`py-2 rounded-lg text-[12px] outline flex-1 relative group ${isActive
+        ? "bg-[#ff00331a] text-[#FF0033] outline-transparent"
+        : "bg-[#ffffff08] text-[#ffffff80] outline-[#ffffff14]"
         }`}
     >
       {text}
@@ -164,56 +146,59 @@ const FilterButton = ({ text, isActive, onClick }) => {
   )
 }
 
+const CardImage = ({ image, title }) => {
+  return (
+    <div className="relative overflow-hidden border border-[#ffffff0d] rounded-2xl">
+      <div className="w-full h-full bg-linear-360 from-black via-black/60 to-black/5 absolute z-5 group-hover:opacity-0 duration-300" />
+      <div className="w-full h-full bg-linear-360 from-rose-600/10 via-rose-600/5 to-rose-600/0 absolute z-5 opacity-0 group-hover:opacity-100 duration-300" />
+      <img
+        src={image}
+        alt={title}
+        className="aspect-4/3 group-hover:scale-105 duration-300"
+      />
+      <CardBorders touchy={true} />
+    </div>
+  )
+}
+
 const ProjectCard = ({ project }) => {
   return (
-    <article className="group relative overflow-hidden rounded-2xl bg-[#ffffff08] border border-[#ffffff14]">
-      <div className="relative h-64 overflow-hidden">
-        <img
-          src={project.image}
-          alt={project.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+    <article className="group relative overflow-hidden border-b border-[#282727] duration-300 hover:border-[#FF0033]">
+      <div className="relative overflow-hidden">
+        <CardImage image={project.image} title={project.title} />
       </div>
       <div className="flex flex-col gap-3 p-5">
-        <p className="text-[12px] uppercase tracking-[0.16em] text-[#FF0033]">
-          {project.category}
-        </p>
-        <h3 className="text-[28px] font-bold leading-[110%] text-white">
+        <div className="flex gap-2 items-center">
+          <p className="text-rose-600 text-[10px]">0{project.id}</p>
+          <span className="inline-block h-px w-8.75 bg-red-400"></span>
+          <p className="text-neutral-400 text-xs">
+            {project.category}
+          </p>
+        </div>
+        <h3 className="text-white text-4xl font-black group-hover:text-[#FF0033] duration-300">
           {project.title}
         </h3>
-        <div className="flex flex-wrap gap-2">
-          {project.labels.map((label) => (
-            <span
-              key={label}
-              className="rounded-full border border-[#ffffff14] bg-[#ffffff08] px-3 py-1 text-[11px] text-[#ffffff80]"
-            >
-              {label}
-            </span>
-          ))}
-        </div>
       </div>
     </article>
   )
 }
 
 const ProjectsSection = () => {
+  const navigate = useNavigate()
   const [activeFilters, setActiveFilters] = useState(["All"])
   const [projects, setProjects] = useState([])
-  const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
 
   useEffect(() => {
     let cancelled = false
 
     const load = async () => {
       setIsLoading(true)
-      const result = await fetchProjects(activeFilters, 1)
+      const result = await fetchProjects(activeFilters)
       if (cancelled) return
       setProjects(result.items)
       setHasMore(result.hasMore)
-      setPage(1)
       setIsLoading(false)
     }
 
@@ -240,15 +225,8 @@ const ProjectsSection = () => {
     })
   }
 
-  const handleViewMore = async () => {
-    if (isLoadingMore || !hasMore) return
-    setIsLoadingMore(true)
-    const nextPage = page + 1
-    const result = await fetchProjects(activeFilters, nextPage)
-    setProjects((prev) => [...prev, ...result.items])
-    setHasMore(result.hasMore)
-    setPage(nextPage)
-    setIsLoadingMore(false)
+  const handleViewMore = () => {
+    navigate("/projects")
   }
 
   return (
@@ -275,12 +253,12 @@ const ProjectsSection = () => {
               {Array.from({ length: PAGE_SIZE }).map((_, index) => (
                 <div
                   key={index}
-                  className="h-[420px] animate-pulse rounded-2xl bg-[#ffffff08] border border-[#ffffff14]"
+                  className="h-105 animate-pulse rounded-2xl bg-[#ffffff08] border border-[#ffffff14]"
                 />
               ))}
             </div>
           ) : projects.length ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
               ))}
@@ -295,10 +273,11 @@ const ProjectsSection = () => {
               <button
                 type="button"
                 onClick={handleViewMore}
-                disabled={isLoadingMore}
-                className="relative overflow-hidden rounded-lg border border-[#ffffff14] bg-[#ffffff08] px-8 py-3 text-[14px] text-white disabled:opacity-60"
+                className="bg-[#FF0033CC] px-15 py-5 text-sm text-white font-bold cursor-pointer hover:bg-[#ff0033] duration-300 relative overflow-hidden"
               >
-                {isLoadingMore ? "Loading..." : "View More"}
+                <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -left-5 -bottom-5 rotate-45"></span>
+                <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -right-5 -top-5 rotate-45"></span>
+                View More
                 <CardBorders byHover={false} active={false} />
               </button>
             </div>
