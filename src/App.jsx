@@ -6,6 +6,7 @@ import ProjectsSection from "./components/ProjectsSection.jsx"
 import TitlesSection from "./components/TitlesSection.jsx"
 import ToolsSection from "./components/ToolsSection.jsx"
 import PricingSection from "./components/PricingSection.jsx"
+import CommentsSection from "./components/CommentsSection.jsx"
 
 function HomePage() {
   return (
@@ -16,6 +17,7 @@ function HomePage() {
       <ToolsSection />
       <ProjectsSection />
       <PricingSection />
+      <CommentsSection />
     </>
   )
 }

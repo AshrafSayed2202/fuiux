@@ -208,10 +208,10 @@ const PricingSection = () => {
                     <li key={feature.label} className="flex items-center gap-2.5">
                       {feature.included ? <CheckIcon active={true} /> : <CrossIcon />}
                       <span
-                        className={`text-sm duration-300 line-clamp-1 truncate ${feature.included?
+                        className={`text-sm leading-5 tracking-wide duration-300 line-clamp-1 truncate ${feature.included ?
                           isHovered? "text-white/90":"text-white/65"
                           :
-                          isHovered? "text-white/50": "text-white/25"
+                          isHovered ? "text-white/50 line-through" : "text-white/25 line-through"
                           }`}
                       >
                         {feature.label}
