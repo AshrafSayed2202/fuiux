@@ -7,6 +7,8 @@ import TitlesSection from "./components/TitlesSection.jsx"
 import ToolsSection from "./components/ToolsSection.jsx"
 import PricingSection from "./components/PricingSection.jsx"
 import CommentsSection from "./components/CommentsSection.jsx"
+import LetsSection from "./components/LetsSection.jsx"
+import Footer from "./components/Footer.jsx"
 
 function HomePage() {
   return (
@@ -18,6 +20,8 @@ function HomePage() {
       <ProjectsSection />
       <PricingSection />
       <CommentsSection />
+      <LetsSection />
+      <Footer />
     </>
   )
 }

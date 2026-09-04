@@ -2,7 +2,7 @@ import AboutTitle from "../ui/AboutTitle"
 
 const TitlesSection = () => {
     return (
-        <div className="h-[200vh] bg-zinc-950 flex flex-col items-center justify-center overflow-x-hidden">
+        <div className=" bg-zinc-950 flex flex-col items-center justify-center overflow-x-hidden">
             <AboutTitle name='Ui/Ux' />
             <AboutTitle name='Designer' />
             <AboutTitle name='+' />

@@ -97,7 +97,7 @@ const CommentsSection = () => {
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
         <Header header="Testimonials" />
 
-        <div className="relative flex items-center justify-between gap-6 border-b border-white/8 pb-6">
+        <div className="relative flex items-end justify-between gap-6 pb-6 border-b border-white/3">
           <h1 className="text-[80px] font-extrabold text-white leading-[100%] tracking-[-1.6px]">
             What Clients
             <span className="neon-text"> Say ?</span>
@@ -106,7 +106,7 @@ const CommentsSection = () => {
             <button
               type="button"
               onClick={() => go(-1)}
-              className="w-10 h-10 grid place-items-center border border-[#FF2B2B]/40 text-[#FF2B2B] bg-[#1A0505] hover:bg-[#FF2B2B] hover:text-white transition-colors"
+              className="w-10 h-10 grid place-items-center rounded-lg cursor-pointer text-[#FF0033] bg-[#FF0033]/10 hover:bg-[#FF0033]/70 hover:text-white duration-300"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M9 3L5 7L9 11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -115,7 +115,7 @@ const CommentsSection = () => {
             <button
               type="button"
               onClick={() => go(1)}
-              className="w-10 h-10 grid place-items-center border border-[#FF2B2B]/40 text-[#FF2B2B] bg-[#1A0505] hover:bg-[#FF2B2B] hover:text-white transition-colors"
+              className="w-10 h-10 grid place-items-center rounded-lg cursor-pointer text-[#FF0033] bg-[#FF0033]/10 hover:bg-[#FF0033]/70 hover:text-white duration-300"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -123,7 +123,7 @@ const CommentsSection = () => {
             </button>
           </div>
         </div>
-        <div className="relative h-93">
+        <div className="relative h-93 my-30 -translate-y-12">
           <div className="absolute flex w-full h-full justify-center gap-6">
             <img
               key={comment.id}
@@ -143,7 +143,7 @@ const CommentsSection = () => {
               <CommentContainer />
             </div>
           </div>
-          <div className="flex items-center gap-1.5 mt-2 absolute bottom-[1%] left-[46.7%]">
+          <div className="flex items-center gap-1.5 mt-2 absolute bottom-[0%] left-[46.7%]">
             {Array.from({ length: 30 }).map((_, index) => {
               const filled = index < filledDots
               return (
@@ -161,10 +161,10 @@ const CommentsSection = () => {
         </div>
         <div className="mt-16">
           <div className="flex items-center gap-4">
-            <span className="text-[11px] tracking-[0.22em] uppercase text-white/35 shrink-0">
+            <span className=" shrink-0 text-[12px] text-[#ff6467] uppercase leading-4 tracking-[3.60px] flex items-center gap-3">
               Trusted by
             </span>
-            <span className="h-px flex-1 bg-white/8" />
+            <span className="h-px flex-1 bg-white/3" />
           </div>
           <div className="relative mt-6 overflow-hidden">
             <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-linear-to-r from-[#0A0A0A] to-transparent z-10" />
