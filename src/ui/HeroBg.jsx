@@ -260,6 +260,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
         alt=""
         className="absolute inset-0 h-full w-full object-cover pointer-events-none"
         draggable={false}
+        style={{ scale: characterScale }}
       />
 
       <motion.canvas

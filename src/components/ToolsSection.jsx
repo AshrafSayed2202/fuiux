@@ -15,15 +15,15 @@ const ToolsSection = () => {
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
         <Header header="Tools & Proficiency" />
         <div className="grid grid-cols-3 gap-5 ml-auto">
-          <ToolCard icon={<FigmaTool/>} text="Figma" percentage={98} />
-          <ToolCard icon={<ClaudeTool />} text="Claude" percentage={90} />
-          <ToolCard isBlanc={true} />
-          <ToolCard icon={<IllustratorTool />} text="Illustrator" percentage={93} />
-          <ToolCard icon={<InvisionTool />} text="Invision" percentage={85} />
-          <ToolCard icon={<PhotoshopTool />} text="Photoshop" percentage={88} />
-          <ToolCard isBlanc={true} />
-          <ToolCard icon={<BlenderTool />} text="Blender" percentage={80} />
-          <ToolCard icon={<SketchTool />} text="Sketch" percentage={95} />
+          <ToolCard size="55.75" icon={<FigmaTool />} text="Figma" percentage={98} />
+          <ToolCard size="55.75" icon={<ClaudeTool />} text="Claude" percentage={90} />
+          <ToolCard size="55.75" isBlanc={true} />
+          <ToolCard size="55.75" icon={<IllustratorTool />} text="Illustrator" percentage={93} />
+          <ToolCard size="55.75" icon={<InvisionTool />} text="Invision" percentage={85} />
+          <ToolCard size="55.75" icon={<PhotoshopTool />} text="Photoshop" percentage={88} />
+          <ToolCard size="55.75" isBlanc={true} />
+          <ToolCard size="55.75" icon={<BlenderTool />} text="Blender" percentage={80} />
+          <ToolCard size="55.75" icon={<SketchTool />} text="Sketch" percentage={95} />
         </div>
       </div>
     </div>
