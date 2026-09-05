@@ -4,7 +4,7 @@ import { useState } from "react"
 import Header from "../ui/Header"
 import PricingCardNumb from "../assets/svgs/PricingCardNumb"
 import PricingCardNumb2 from "../assets/svgs/PricingCardNumb2"
-import PricingBtn from "../assets/svgs/pricingBtn"
+import PricingBtn from "../assets/svgs/PricingBtn"
 import PricingConnector from "../assets/svgs/PricingConnector"
 import PricingBorder from "../assets/svgs/PricingBorder"
 
