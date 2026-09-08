@@ -14,7 +14,7 @@ const HeroSection = () => {
 
 
     return (
-        <div className="h-[300vh]">
+        <div className="h-[700vh]">
             <div className=" w-full sticky top-0 z-10 flex items-center justify-center overflow-hidden ">
                 <motion.div
                     className="absolute z-50 top-1/2 -translate-y-1/2 left-0 text-center rotate-270 tracking-[4.8px] text-[12px] select-none uppercase text-[#ffffff26] pointer-events-none"
