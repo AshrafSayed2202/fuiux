@@ -7,6 +7,9 @@ import PricingCardNumb2 from "../assets/svgs/PricingCardNumb2"
 import PricingBtn from "../assets/svgs/PricingBtn"
 import PricingConnector from "../assets/svgs/PricingConnector"
 import PricingBorder from "../assets/svgs/PricingBorder"
+import { useScrambleText } from "../hooks/useScrambleText"
+import hoverSound from "../assets/sounds/hover.wav"
+import clickSound from "../assets/sounds/click.wav"
 
 const plans = [
   {
@@ -101,6 +104,105 @@ const CrossIcon = () => (
   </span>
 )
 
+const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
+  const isMid = plan.featured
+  const price = plan.prices[billing]
+  const intervalLabel = billing === "monthly" ? "Month" : "Hour"
+  const filledCount = isHovered ? plan.progress : 0
+  const { text, start, stop, click } = useScrambleText("Get Started", {
+    hoverSound,
+    clickSound,
+    volume: 0.45,
+  })
+
+  return (
+    <article
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      className={`relative flex flex-col ${isMid ? "h-164.5" : "h-154.5"}`}
+    >
+      <div className="absolute z-3 left-0 top-0 scale-[0.95]">
+        <span className={`duration-300 absolute z-3 ${(isMid) ? 'opacity-100' : 'opacity-0'}`}>
+          <PricingCardNumb2 isHovered={isHovered} />
+        </span>
+        <span className={`duration-300 absolute z-3 ${(isMid) ? 'opacity-0' : 'opacity-100'}`}>
+          <PricingCardNumb isHovered={isHovered} />
+        </span>
+      </div>
+      <div className={`absolute z-5 right-12 ${isMid ? "top-16.5" : "top-10"} flex flex-col-reverse gap-1.25`}>
+        {Array.from({ length: 12 }).map((_, index) => {
+          const filled = index < filledCount
+          return (
+            <span
+              key={index}
+              className={`block h-6.5 skew-y-[-45deg] w-6.5 rounded-none transition-all duration-300 ${filled
+                ? "bg-[#FF2B2B] shadow-[0_0_6px_#FF2B2B]"
+                : isMid ? "bg-[#FF003333]" : "bg-[#FFFFFF0F]"
+                }`}
+              style={{
+                transitionDelay: filled
+                  ? `${index * 40}ms`
+                  : `${(11 - index) * 20}ms`,
+              }}
+            />
+          )
+        })}
+      </div>
+      <div className={`absolute z-3 left-[21.5%] top-[6.5%] scale-[0.95]`}>
+        <PricingBorder isHovered={isHovered} isMid={isMid} />
+        <div className="flex flex-col z-5 items-center mb-8 absolute top-0">
+          <div
+            className={`relative w-52.5 h-52.5 flex flex-col items-center justify-center`}>
+            <span className={`text-[11px] tracking-[0.18em] uppercase mb-3 duration-300 ${(isHovered || isMid) ? "text-[#FF0033]" : "text-white/36"}`}>
+              {plan.title}
+            </span>
+            <span className={`text-white/80 text-5xl font-extrabold leading-14 duration-300 ${isHovered ? "scale-125" : ""}`}>
+              ${price.toLocaleString()}
+            </span>
+            <span
+              className={`mt-3 duration-300 text-sm ${(isHovered || isMid) ? "text-[#FF0033]" : "text-white/36"}`}
+            >
+              {intervalLabel}
+            </span>
+          </div>
+        </div>
+      </div>
+      <ul className="flex flex-col relative z-5 gap-3 flex-1 justify-end mb-[25%] ml-[5%]">
+        {plan.features.map((feature) => (
+          <li key={feature.label} className="flex items-center gap-2.5">
+            {feature.included ? <CheckIcon active={true} /> : <CrossIcon />}
+            <span
+              className={`text-sm leading-5 tracking-wide duration-300 line-clamp-1 truncate ${feature.included ?
+                isHovered ? "text-white/90" : "text-white/65"
+                :
+                isHovered ? "text-white/50 line-through" : "text-white/25 line-through"
+                }`}
+            >
+              {feature.label}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div
+        className="absolute z-3 left-2.25 bottom-12.75 scale-[0.95] cursor-pointer"
+        onMouseEnter={start}
+        onMouseLeave={stop}
+        onClick={click}
+      >
+        <PricingBtn isHovered={isHovered} isMid={isMid} />
+        <div
+          className={`absolute duration-300 font-bold cursor-pointer text-nowrap ${isHovered ? "text-white" : "text-[#ffffff99]"} top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]`}
+        >
+          {text}
+        </div>
+      </div>
+      <div className={`absolute z-3 left-45 bottom-15 scale-[0.95] duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}>
+        <PricingConnector isMid={isMid} />
+      </div>
+    </article>
+  )
+}
+
 const PricingSection = () => {
   const [billing, setBilling] = useState("monthly")
   const [hoveredId, setHoveredId] = useState(null)
@@ -143,98 +245,16 @@ const PricingSection = () => {
         </div>
 
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 items-end">
-          {plans.map((plan) => {
-            const isHovered = hoveredId === plan.id
-            const isMid = plan.featured
-            const price = plan.prices[billing]
-            const intervalLabel = billing === "monthly" ? "Month" : "Hour"
-            const filledCount = isHovered ? plan.progress : 0
-
-            return (
-              <article
-                key={plan.id}
-                onMouseEnter={() => setHoveredId(plan.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                className={`relative flex flex-col ${isMid ? "h-164.5" : "h-154.5"}`}
-              >
-                <div className="absolute z-3 left-0 top-0 scale-[0.95]">
-                  <span className={`duration-300 absolute z-3 ${(isMid) ? 'opacity-100' : 'opacity-0'}`}>
-                    <PricingCardNumb2 isHovered={isHovered} />
-                  </span>
-                  <span className={`duration-300 absolute z-3 ${(isMid) ? 'opacity-0' : 'opacity-100'}`}>
-                    <PricingCardNumb isHovered={isHovered} />
-                  </span>
-                </div>
-                <div className={`absolute z-5 right-12 ${isMid ? "top-16.5" : "top-10"} flex flex-col-reverse gap-1.25`}>
-                  {Array.from({ length: 12 }).map((_, index) => {
-                    const filled = index < filledCount
-                    return (
-                      <span
-                        key={index}
-                        className={`block h-6.5 skew-y-[-45deg] w-6.5 rounded-none transition-all duration-300 ${filled
-                          ? "bg-[#FF2B2B] shadow-[0_0_6px_#FF2B2B]"
-                          : isMid ? "bg-[#FF003333]" : "bg-[#FFFFFF0F]"
-                          }`}
-                        style={{
-                          transitionDelay: filled
-                            ? `${index * 40}ms`
-                            : `${(11 - index) * 20}ms`,
-                        }}
-                      />
-                    )
-                  })}
-                </div>
-                <div className={`absolute z-3 left-[21.5%] top-[6.5%] scale-[0.95]`}>
-                  <PricingBorder isHovered={isHovered} isMid={isMid} />
-                  <div className="flex flex-col z-5 items-center mb-8 absolute top-0">
-                    <div
-                      className={`relative w-52.5 h-52.5 flex flex-col items-center justify-center`}>
-                      <span className={`text-[11px] tracking-[0.18em] uppercase mb-3 duration-300 ${(isHovered || isMid) ? "text-[#FF0033]" : "text-white/36"}`}>
-                        {plan.title}
-                      </span>
-                      <span className={`text-white/80 text-5xl font-extrabold leading-14 duration-300 ${isHovered ? "scale-125" : ""}`}>
-                        ${price.toLocaleString()}
-                      </span>
-                      <span
-                        className={`mt-3 duration-300 text-sm ${(isHovered || isMid) ? "text-[#FF0033]" : "text-white/36"}`}
-                      >
-                        {intervalLabel}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <ul className="flex flex-col relative z-5 gap-3 flex-1 justify-end mb-[25%] ml-[5%]">
-                  {plan.features.map((feature) => (
-                    <li key={feature.label} className="flex items-center gap-2.5">
-                      {feature.included ? <CheckIcon active={true} /> : <CrossIcon />}
-                      <span
-                        className={`text-sm leading-5 tracking-wide duration-300 line-clamp-1 truncate ${feature.included ?
-                          isHovered? "text-white/90":"text-white/65"
-                          :
-                          isHovered ? "text-white/50 line-through" : "text-white/25 line-through"
-                          }`}
-                      >
-                        {feature.label}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="absolute z-3 left-2.25 bottom-12.75 scale-[0.95] cursor-pointer">
-                  <PricingBtn isHovered={isHovered} isMid={isMid} />
-                  <button
-                    type="button"
-                    className={`absolute duration-300 font-bold text-nowrap ${isHovered ? "text-white" : "text-[#ffffff99]"} top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]`}
-                  >
-                    Get Started
-                  </button>
-                </div>
-                <div className={`absolute z-3 left-45 bottom-15 scale-[0.95] duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}>
-                  <PricingConnector isMid={isMid} />
-                </div>
-
-              </article>
-            )
-          })}
+          {plans.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              billing={billing}
+              isHovered={hoveredId === plan.id}
+              onEnter={() => setHoveredId(plan.id)}
+              onLeave={() => setHoveredId(null)}
+            />
+          ))}
         </div>
       </div>
     </div>

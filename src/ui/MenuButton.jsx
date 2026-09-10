@@ -1,16 +1,29 @@
 import MenuBtn1 from "../assets/svgs/MenuBtn1"
 import MenuBtn2 from "../assets/svgs/MenuBtn2"
 import { useScrambleText } from "../hooks/useScrambleText"
+import hoverSound from "../assets/sounds/hover.wav"
+import clickSound from "../assets/sounds/click.wav"
 
 const MenuButton = ({ active, open }) => {
-  const { text, start, stop } = useScrambleText("Hire me")
+  const { text, start, stop, click } = useScrambleText("Hire me", {
+    hoverSound,
+    clickSound,
+    volume: 0.45,
+  })
 
   return (
     <div className="flex items-center overflow-hidden">
       <div
-        className={`h-10.5 w-37 relative cursor-pointer group overflow-hidden`}
-        onMouseEnter={start}
-        onMouseLeave={stop}
+        className={`h-10.5 w-37 relative group overflow-hidden ${active ? "pointer-events-none select-none" : "cursor-pointer"}`}
+        onMouseEnter={() => {
+          if (!active) start()
+        }}
+        onMouseLeave={() => {
+          if (!active) stop()
+        }}
+        onClick={() => {
+          if (!active) click()
+        }}
       >
         <div className={`text-white uppercase text-sm relative z-2 font-bold leading-5 tracking-tight flex items-center justify-center h-full w-full duration-600 ${active ? "translate-x-[105%] opacity-0" : ""}`}>
           {text}
@@ -19,8 +32,16 @@ const MenuButton = ({ active, open }) => {
           <MenuBtn1 />
         </div>
       </div>
-      <div className="h-10.5 w-18.5 relative cursor-pointer group">
-        <div className="relative z-2 h-full w-full flex flex-col items-center gap-1 justify-center pr-3.75" onClick={open}>
+      <div
+        className="h-10.5 w-18.5 relative cursor-pointer group"
+        onMouseEnter={start}
+        onMouseLeave={stop}
+        onClick={() => {
+          click()
+          open?.()
+        }}
+      >
+        <div className="relative z-2 h-full w-full flex flex-col items-center gap-1 justify-center pr-3.75">
           <span className={`h-1 w-5  bg-white rounded-lg duration-300 -translate-x-1.75 ${active ? "rotate-45 -translate-x-3 translate-y-px" : ""} `} />
           <span className={`h-1 w-10 bg-white rounded-lg duration-300 ${active ? "-rotate-45 -translate-x-1.25" : ""} `} />
           <span className={`h-1 w-5  bg-white rounded-lg duration-300 translate-x-1.75 ${active ? "rotate-45 translate-x-0.75! -translate-y-px" : ""} `} />

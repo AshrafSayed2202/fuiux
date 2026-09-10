@@ -11,6 +11,35 @@ import LogoFooter from "../assets/svgs/LogoFooter";
 import MailVec from "../assets/svgs/MailVec";
 import YouTubeVec from "../assets/svgs/YouTubeVec";
 import ToolCard from "../ui/ToolCard";
+import { useScrambleText } from "../hooks/useScrambleText";
+import hoverSound from "../assets/sounds/hover.wav";
+import clickSound from "../assets/sounds/click.wav";
+
+const FooterNavItem = ({ title, link }) => {
+  const { start, stop, click } = useScrambleText(title, {
+    hoverSound,
+    clickSound,
+    volume: 0.45,
+  });
+
+  return (
+    <div className="w-full flex items-center justify-center text-3xl px-6 py-4 text-center relative">
+      <a
+        href={link}
+        onMouseEnter={start}
+        onMouseLeave={stop}
+        onClick={click}
+        className="text-white font-extrabold uppercase w-64.25 h-10 duration-300 group"
+      >
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover:opacity-100 duration-300">
+          <LinkHoverFooter />
+        </div>
+        {title}
+      </a>
+    </div>
+  );
+};
+
 const Footer = () => {
   const navs = [
     { title: "HOME", link: "#home" },
@@ -54,14 +83,7 @@ const Footer = () => {
               <LogoFooter />
             </div>
             {navs.map((nav, index) => (
-              <div className="w-full flex items-center justify-center text-3xl px-6 py-4 text-center relative" key={index}>
-                <a href={nav.link} className="text-white font-extrabold uppercase w-64.25 h-10 duration-300 group">
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover:opacity-100 duration-300">
-                    <LinkHoverFooter />
-                  </div>
-                  {nav.title}
-                </a>
-              </div>
+              <FooterNavItem key={index} title={nav.title} link={nav.link} />
             ))}
 
           </div>

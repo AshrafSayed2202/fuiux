@@ -2,6 +2,9 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import CardBorders from "../ui/CardBorders"
 import Header from "../ui/Header"
+import { useScrambleText } from "../hooks/useScrambleText"
+import hoverSound from "../assets/sounds/hover.wav"
+import clickSound from "../assets/sounds/click.wav"
 
 const PROJECTS = [
   {
@@ -183,6 +186,32 @@ const ProjectCard = ({ project }) => {
   )
 }
 
+const ViewMoreButton = ({ onClick }) => {
+  const { text, start, stop, click } = useScrambleText("VIEW MORE", {
+    hoverSound,
+    clickSound,
+    volume: 0.45,
+  })
+
+  return (
+    <button
+      type="button"
+      onMouseEnter={start}
+      onMouseLeave={stop}
+      onClick={() => {
+        click()
+        onClick?.()
+      }}
+      className="bg-[#FF0033CC] px-15 py-5 text-sm text-white font-bold cursor-pointer hover:bg-[#ff0033] duration-300 relative overflow-hidden w-54 h-15 text-nowrap"
+    >
+      <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -left-5 -bottom-5 rotate-45"></span>
+      <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -right-5 -top-5 rotate-45"></span>
+      {text}
+      <CardBorders byHover={false} active={false} />
+    </button>
+  )
+}
+
 const ProjectsSection = () => {
   const navigate = useNavigate()
   const [activeFilters, setActiveFilters] = useState(["All"])
@@ -258,7 +287,7 @@ const ProjectsSection = () => {
               ))}
             </div>
           ) : projects.length ? (
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
               ))}
@@ -270,16 +299,7 @@ const ProjectsSection = () => {
           )}
           {!isLoading && hasMore && (
             <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={handleViewMore}
-                className="bg-[#FF0033CC] px-15 py-5 text-sm text-white font-bold cursor-pointer hover:bg-[#ff0033] duration-300 relative overflow-hidden"
-              >
-                <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -left-5 -bottom-5 rotate-45"></span>
-                <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -right-5 -top-5 rotate-45"></span>
-                VIEW MORE
-                <CardBorders byHover={false} active={false} />
-              </button>
+              <ViewMoreButton onClick={handleViewMore} />
             </div>
           )}
         </div>
