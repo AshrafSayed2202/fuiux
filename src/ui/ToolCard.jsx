@@ -1,6 +1,7 @@
 import CardBorders from "./CardBorders"
 import redCircle from "../assets/images/redCircle.png"
-const ToolCard = ({ icon, text, percentage, isBlanc = false, size }) => {
+
+const ToolCard = ({ icon, text, percentage, isBlanc = false, size, bigDot }) => {
   if (isBlanc) {
     return <div className={`rounded-2xl aspect-square size-${size}`} />
   }
@@ -20,7 +21,7 @@ const ToolCard = ({ icon, text, percentage, isBlanc = false, size }) => {
           {text}
         </span>
       )}
-      <img src={redCircle} alt="" className="absolute bottom-1 left-1" />
+      <img src={redCircle} alt="" className={`absolute ${bigDot ? 'scale-150 bottom-4 left-4' : 'bottom-1.5 left-1.5'}`} />
       <CardBorders />
     </div>
   )
