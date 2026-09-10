@@ -106,7 +106,7 @@ const PricingSection = () => {
   const [hoveredId, setHoveredId] = useState(null)
 
   return (
-    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!">
+    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!" id="pricing">
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
         <Header header="Pricing" centered={true} />
         <h1 className="text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-1.6px]">

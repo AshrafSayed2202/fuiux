@@ -1,9 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
 *{
   font-family: var(--font-orbitron);
+  scroll-behavior: smooth;
 }
 body {
     background-color: #0D0B0B;
+    scroll-behavior: smooth;
 }
 .neon-text {
   color: rgba(70, 8, 9, 0.40);

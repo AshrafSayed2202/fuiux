@@ -1,12 +1,19 @@
 import MenuBtn1 from "../assets/svgs/MenuBtn1"
 import MenuBtn2 from "../assets/svgs/MenuBtn2"
+import { useScrambleText } from "../hooks/useScrambleText"
 
 const MenuButton = ({ active, open }) => {
+  const { text, start, stop } = useScrambleText("Hire me")
+
   return (
     <div className="flex items-center overflow-hidden">
-      <div className={`h-10.5 w-37 relative cursor-pointer group overflow-hidden`}>
+      <div
+        className={`h-10.5 w-37 relative cursor-pointer group overflow-hidden`}
+        onMouseEnter={start}
+        onMouseLeave={stop}
+      >
         <div className={`text-white uppercase text-sm relative z-2 font-bold leading-5 tracking-tight flex items-center justify-center h-full w-full duration-600 ${active ? "translate-x-[105%] opacity-0" : ""}`}>
-          Hire me
+          {text}
         </div>
         <div className={`absolute top-0 left-0 h-full w-full z-1 duration-600 ${active ? "translate-x-[105%] opacity-0" : ""}`}>
           <MenuBtn1 />

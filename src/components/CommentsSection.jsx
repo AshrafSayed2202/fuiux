@@ -77,7 +77,7 @@ const CommentsSection = () => {
   }
 
   return (
-    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!">
+    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!" id="testimonials">
       <style>{`
         @keyframes comment-swap {
           from { opacity: 0; transform: translateX(var(--comment-x)); }

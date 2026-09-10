@@ -10,7 +10,7 @@ import BlenderTool from "../assets/svgs/BlenderTool.jsx"
 import SketchTool from "../assets/svgs/SketchTool.jsx"
 const ToolsSection = () => {
   return (
-    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!">
+    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!" id="tools">
         <img src={background} alt="tools background" className="absolute top-0 left-0 w-[70%] h-auto" />
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
         <Header header="Tools & Proficiency" />

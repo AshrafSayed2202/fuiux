@@ -135,7 +135,7 @@ const FilterButton = ({ text, isActive, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className={`py-2 rounded-lg text-[12px] outline flex-1 relative group ${isActive
+      className={`py-2 cursor-pointer rounded-lg text-[12px] outline flex-1 relative group ${isActive
         ? "bg-[#ff00331a] text-[#FF0033] outline-transparent"
         : "bg-[#ffffff08] text-[#ffffff80] outline-[#ffffff14]"
         }`}
@@ -230,7 +230,7 @@ const ProjectsSection = () => {
   }
 
   return (
-    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!">
+    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!" id="work">
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
         <Header header="Selected Work" />
         <h1 className="text-[80px] font-extrabold text-white leading-[100%] tracking-[-1.6px]">
@@ -277,7 +277,7 @@ const ProjectsSection = () => {
               >
                 <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -left-5 -bottom-5 rotate-45"></span>
                 <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -right-5 -top-5 rotate-45"></span>
-                View More
+                VIEW MORE
                 <CardBorders byHover={false} active={false} />
               </button>
             </div>

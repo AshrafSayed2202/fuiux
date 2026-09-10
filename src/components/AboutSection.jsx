@@ -4,13 +4,13 @@ import Header from "../ui/Header"
 
 const AboutSection = () => {
   return (
-    <div className="bg-[#0A0A0A] py-46 relative">
+    <div className="bg-[#0A0A0A] py-46 relative" id="about">
       <div className="w-175 h-100 bg-[#C100071A] rounded-full blur-[100px] absolute -top-15" />
       <div className="w-100 h-100 bg-[#82181A14] rounded-full blur-[120px] absolute bottom-0 right-0" />
       <div className="relative w-full flex container flex-col gap-7.5">
         <Header header="About me" />
         <div className="flex gap-35">
-          <div className="flex flex-col gap-17.5 flex-1">
+          <div className="flex flex-col gap-17.5 flex-1 justify-between">
             <h1 className="text-[80px] font-extrabold text-white leading-[100%] tracking-[-1.6px]">
               Crafting digital <br />
               <span className="neon-text">Stories</span> That <br />

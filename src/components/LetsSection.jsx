@@ -7,7 +7,7 @@ import LetsBg1 from "../assets/images/LetsBg1.png"
 import LetsBg2 from "../assets/images/LetsBg2.png"
 const LetsSection = () => {
   return (
-    <div className="bg-[#0A0A0A] relative min-h-screen flex items-center justify-center overflow-hidden!">
+    <div className="bg-[#0A0A0A] relative min-h-screen flex items-center justify-center overflow-hidden!" id="contact">
       <img src={LetsBg1} alt="lets-bg-1" className="absolute top-1/2 left-1/2 object-cover translate-x-[-50%] translate-y-[-50%]" />
       <img src={LetsBg2} alt="lets-bg-2" className="absolute top-1/2 left-1/2 object-cover translate-x-[-50%] translate-y-[-50%]" />
       <img src={LetsChar1} alt="lets-char-1" className="absolute bottom-0 right-0 h-full object-cover object-center" />
