@@ -15,7 +15,7 @@ const CommentContainer = () => {
       <defs>
         <linearGradient id="paint0_linear_2764_5315" x1="452" y1="0" x2="452" y2="371.5" gradientUnits="userSpaceOnUse">
           <stop stopColor="#FF0033" />
-          <stop offset="1" stop-color="#99001F" />
+          <stop offset="1" stopColor="#99001F" />
         </linearGradient>
       </defs>
     </svg>

@@ -5,7 +5,8 @@ import Header from "../ui/Header"
 import { useScrambleText } from "../hooks/useScrambleText"
 import hoverSound from "../assets/sounds/hover.wav"
 import clickSound from "../assets/sounds/click.wav"
-
+import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
+import Arrow from "../assets/svgs/Arrow"
 const PROJECTS = [
   {
     id: 1,
@@ -134,17 +135,24 @@ const fetchProjects = (filters) => {
 }
 
 const FilterButton = ({ text, isActive, onClick }) => {
+  const playHover = () => {
+    const audio = new Audio(secondaryHoverSound)
+    audio.volume = 0.15
+    audio.play().catch(() => { })
+  }
+
   return (
     <button
       type="button"
       onClick={onClick}
+      onMouseEnter={playHover}
       className={`py-2 cursor-pointer rounded-lg text-[12px] outline flex-1 relative group ${isActive
         ? "bg-[#ff00331a] text-[#FF0033] outline-transparent"
         : "bg-[#ffffff08] text-[#ffffff80] outline-[#ffffff14]"
         }`}
     >
       {text}
-      <CardBorders byHover={false} active={isActive} />
+      <CardBorders byHover={true} active={isActive} />
     </button>
   )
 }
@@ -165,6 +173,12 @@ const CardImage = ({ image, title }) => {
 }
 
 const ProjectCard = ({ project }) => {
+  const playHover = () => {
+    const audio = new Audio(secondaryHoverSound)
+    audio.volume = 0.15
+    audio.play().catch(() => { })
+  }
+  const [arrowHover, setArrowHover] = useState(false)
   return (
     <article className="group relative overflow-hidden border-b border-[#282727] duration-300 hover:border-[#FF0033]">
       <div className="relative overflow-hidden">
@@ -178,9 +192,14 @@ const ProjectCard = ({ project }) => {
             {project.category}
           </p>
         </div>
-        <h3 className="text-white text-4xl font-black group-hover:text-[#FF0033] duration-300">
-          {project.title}
-        </h3>
+        <div className="flex items-end justify-between">
+          <h3 className="text-white text-4xl font-black group-hover:text-[#FF0033] duration-300">
+            {project.title}
+          </h3>
+          <div className="p-1 cursor-pointer hover:rotate-45 duration-300 group" onMouseEnter={() => { playHover(); setArrowHover(true) }} onMouseLeave={() => { setArrowHover(false) }}>
+            <Arrow hover={arrowHover} />
+          </div>
+        </div>
       </div>
     </article>
   )

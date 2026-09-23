@@ -10,6 +10,7 @@ import PricingBorder from "../assets/svgs/PricingBorder"
 import { useScrambleText } from "../hooks/useScrambleText"
 import hoverSound from "../assets/sounds/hover.wav"
 import clickSound from "../assets/sounds/click.wav"
+import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
 
 const plans = [
   {
@@ -207,6 +208,16 @@ const PricingSection = () => {
   const [billing, setBilling] = useState("monthly")
   const [hoveredId, setHoveredId] = useState(null)
 
+  const playSecondaryHover = () => {
+    const audio = new Audio(secondaryHoverSound)
+    audio.volume = 0.15
+    audio.play().catch(() => { })
+  }
+  const playClickHover = () => {
+    const audio = new Audio(clickSound)
+    audio.volume = 0.45
+    audio.play().catch(() => { })
+  }
   return (
     <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!" id="pricing">
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
@@ -223,7 +234,11 @@ const PricingSection = () => {
           <div className="flex items-center gap-1.25 rounded-lg p-1.25 border border-white/10">
             <button
               type="button"
-              onClick={() => setBilling("hourly")}
+              onClick={() => {
+                setBilling("hourly");
+                playClickHover()
+              }}
+              onMouseEnter={playSecondaryHover}
               className={`px-8 py-3.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${billing === "hourly"
                 ? "text-[#FF2B2B] border border-[#FF2B2B] bg-[#FF2B2B]/10"
                 : "text-white/70 border border-transparent"
@@ -233,7 +248,11 @@ const PricingSection = () => {
             </button>
             <button
               type="button"
-              onClick={() => setBilling("monthly")}
+              onClick={() => {
+                setBilling("monthly");
+                playClickHover()
+              }}
+              onMouseEnter={playSecondaryHover}
               className={`px-8 py-3.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${billing === "monthly"
                 ? "text-[#FF2B2B] border border-[#FF2B2B] bg-[#FF2B2B]/10"
                 : "text-white/70 border border-transparent"

@@ -7,8 +7,8 @@ const LinkHoverFooter = () => {
         <path d="M115.5 100H446L460 105.484V122.078L446 127H112.5L100 122.078V105.484L115.5 100Z" fill="#FF0033" />
       </g>
       <defs>
-        <filter id="filter0_f_2307_23141" x="0" y="0" width="560" height="227" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <filter id="filter0_f_2307_23141" x="0" y="0" width="560" height="227" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
           <feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_2307_23141" />
         </filter>

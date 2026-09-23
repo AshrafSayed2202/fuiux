@@ -9,6 +9,9 @@ import commentor3 from "../assets/images/commentor3.png"
 import commentor4 from "../assets/images/commentor4.png"
 import commentor5 from "../assets/images/commentor5.png"
 import commentor6 from "../assets/images/commentor6.png"
+import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
+import clickSound from "../assets/sounds/click.wav"
+
 const comments = [
   {
     id: 1,
@@ -71,6 +74,17 @@ const CommentsSection = () => {
   const comment = comments[active]
   const filledDots = (active + 1) * 5
 
+  const playSecondaryHover = () => {
+    const audio = new Audio(secondaryHoverSound)
+    audio.volume = 0.15
+    audio.play().catch(() => { })
+  }
+  const playClickHover = () => {
+    const audio = new Audio(clickSound)
+    audio.volume = 0.45
+    audio.play().catch(() => { })
+  }
+
   const go = (step) => {
     setDir(step)
     setActive((current) => (current + step + comments.length) % comments.length)
@@ -105,7 +119,8 @@ const CommentsSection = () => {
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              onClick={() => go(-1)}
+              onClick={() => { go(-1); playClickHover() }}
+              onMouseEnter={playSecondaryHover}
               className="w-10 h-10 grid place-items-center rounded-lg cursor-pointer text-[#FF0033] bg-[#FF0033]/10 hover:bg-[#FF0033]/70 hover:text-white duration-300"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -114,7 +129,8 @@ const CommentsSection = () => {
             </button>
             <button
               type="button"
-              onClick={() => go(1)}
+              onClick={() => { go(1); playClickHover() }}
+              onMouseEnter={playSecondaryHover}
               className="w-10 h-10 grid place-items-center rounded-lg cursor-pointer text-[#FF0033] bg-[#FF0033]/10 hover:bg-[#FF0033]/70 hover:text-white duration-300"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -125,13 +141,16 @@ const CommentsSection = () => {
         </div>
         <div className="relative h-93 my-30 -translate-y-12">
           <div className="absolute flex w-full h-full justify-center gap-6">
-            <img
-              key={comment.id}
-              src={comment.image}
-              alt={comment.name}
-              className="comment-swap inset-0 max-h-93"
-              style={{ "--comment-x": dir > 0 ? "18px" : "-18px" }}
-            />
+            <div className="relative h-93 w-72 shrink-0">
+              <div className="absolute inset-0" />
+              <img
+                key={comment.id}
+                src={comment.image}
+                alt={comment.name}
+                className="comment-swap absolute inset-0 h-full ml-auto"
+                style={{ "--comment-x": dir > 0 ? "18px" : "-18px" }}
+              />
+            </div>
             <div className="relative">
               <div className="absolute left-[13%] top-[9%] text-white flex flex-col gap-1.5 font-semibold">
                 <p className="text-2xl">{comment.name}</p>

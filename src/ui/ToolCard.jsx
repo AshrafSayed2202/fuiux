@@ -1,16 +1,24 @@
 import CardBorders from "./CardBorders"
 import redCircle from "../assets/images/redCircle.png"
+import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
 
 const ToolCard = ({ icon, text, percentage, isBlanc = false, size, bigDot }) => {
   if (isBlanc) {
     return <div className={`rounded-2xl aspect-square size-${size}`} />
   }
 
+  const playHover = () => {
+    const audio = new Audio(secondaryHoverSound)
+    audio.volume = 0.15
+    audio.play().catch(() => { })
+  }
+
   return (
     <div
-      className={`rounded-2xl border bg-white/5 hover:bg-transparent duration-300 border-[#ffffff0d] p-6 flex flex-col gap-5 items-center justify-center cursor-pointer relative overflow-hidden group aspect-square size-${size} max-w-${size}`}
+      className={`rounded-2xl border bg-white/5 hover:bg-transparent backdrop-blur-[10px] duration-300 border-[#ffffff0d] p-6 flex flex-col gap-5 items-center justify-center cursor-pointer relative overflow-hidden group aspect-square size-${size} max-w-${size}`}
+      onMouseEnter={playHover}
     >
-      {(percentage > 0) && (
+      {percentage > 0 && (
         <span className="text-[15px] font-bold text-[#FF0033] opacity-0 group-hover:opacity-100 transition-opacity duration-500 leading-[150%] absolute top-3.5 right-3.5">
           {percentage}%
         </span>
@@ -21,7 +29,11 @@ const ToolCard = ({ icon, text, percentage, isBlanc = false, size, bigDot }) => 
           {text}
         </span>
       )}
-      <img src={redCircle} alt="" className={`absolute ${bigDot ? 'scale-150 bottom-4 left-4' : 'bottom-1.5 left-1.5'}`} />
+      <img
+        src={redCircle}
+        alt=""
+        className={`absolute ${bigDot ? "scale-150 bottom-4 left-4" : "bottom-1.5 left-1.5"}`}
+      />
       <CardBorders />
     </div>
   )

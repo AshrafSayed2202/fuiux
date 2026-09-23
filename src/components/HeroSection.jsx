@@ -1,52 +1,67 @@
 import { useScroll, useTransform, motion } from "framer-motion"
 import HeroBg from "../ui/HeroBg"
+import HeroLogo from "../assets/svgs/HeroLogo"
 
 const HeroSection = () => {
     const { scrollYProgress } = useScroll({
-        offset: ["start start", "end start"]
+        offset: ["start start", "end end"]
     })
 
-    const scale = useTransform(scrollYProgress, [0, 0.3, 1], [1.1, 0.35, 0.38])
-    const textOpacity = useTransform(scrollYProgress, [0, 0.3, 1], [1, 0, 0])
-    const overlayOpacity = useTransform(scrollYProgress, [0, 0.3, 1], [0, 0.3, 0.3])
+    // Main scale + text finish early
+    const scale = useTransform(scrollYProgress, [0, 0.2, 1], [1.1, 0.35, 0.38])
+    const textOpacity = useTransform(scrollYProgress, [0, 0.2, 1], [1, 0, 0])
 
-    const mouseEnabled = useTransform(scrollYProgress, [0, 0.3, 1], [1, 0, 0])
+    // Logo full animation between 0.2 → 0.45 (fully done before exit starts)
+    const logoOpacity = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.38], [0, 0, 1, 1])
+    const logoScale = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.40], [2.5, 2.5, 1.15, 0.8])
 
+    const overlayOpacity = useTransform(scrollYProgress, [0, 0.2, 1], [0, 0.3, 0.3])
+    const mouseEnabled = useTransform(scrollYProgress, [0, 0.2, 1], [1, 0, 0])
 
     return (
         <div className="h-[700vh]" id="home">
-            <div className=" w-full sticky top-0 z-10 flex items-center justify-center overflow-hidden bg-zinc-950">
+            <div className="w-full sticky top-0 z-10 flex items-center justify-center overflow-hidden bg-zinc-950">
+                {/* Side Texts */}
                 <motion.div
                     className="absolute z-50 top-1/2 -translate-y-1/2 left-0 text-center rotate-270 tracking-[4.8px] text-[12px] select-none uppercase text-[#ffffff26] pointer-events-none"
                     style={{ opacity: textOpacity }}
                 >
-                Designer & Creative Director
+                    Designer & Creative Director
                 </motion.div>
-
                 <motion.div
                     className="absolute z-50 top-1/2 right-0 -translate-y-1/2 text-center rotate-90 tracking-[4.8px] text-[12px] select-none uppercase text-[#ffffff26] pointer-events-none"
                     style={{ opacity: textOpacity }}
                 >
-                Based in Cairo,egypt — 2026
+                    Based in Cairo,egypt — 2026
                 </motion.div>
 
+                {/* Logo */}
+                <motion.div
+                    className="absolute z-50 top-1/10 left-1/2 -translate-x-1/2 select-none pointer-events-none"
+                    style={{ opacity: logoOpacity, scale: logoScale }}
+                >
+                    <HeroLogo />
+                </motion.div>
+
+                {/* Scroll indicator */}
                 <motion.div
                     className="absolute z-50 bottom-0 left-1/2 -translate-y-1/2 -translate-x-1/2 text-center select-none uppercase flex flex-col items-center gap-2 justify-center pointer-events-none"
                     style={{ opacity: textOpacity }}
                 >
                     <span className="bold z-50 relative text-white bold tracking-[4.8px] text-[12px] opacity-20">
-                    Scroll
-                </span>
-                <span className="h-12 w-px block bg-linear-to-b from-[#ffffff33] to-transparent" ></span>
-                <div className="absolute flex items-center gap-2 justify-center py-2 px-4 bg-[#46080933] border-[#E7000B4D] border rounded-lg -bottom-4">
-                    <span className="size-2 min-w-2 rounded-full bg-[#FB2C36]"></span>
-                    <span className="text-[#FF6467E5] z-50 relative tracking-[4.8px] text-[12px] uppercase block text-nowrap">
-                        Available for Projects
+                        Scroll
                     </span>
-                </div>
+                    <span className="h-12 w-px block bg-linear-to-b from-[#ffffff33] to-transparent"></span>
+                    <div className="absolute flex items-center gap-2 justify-center py-2 px-4 bg-[#46080933] border-[#E7000B4D] border rounded-lg -bottom-4">
+                        <span className="size-2 min-w-2 rounded-full bg-[#FB2C36]"></span>
+                        <span className="text-[#FF6467E5] z-50 relative tracking-[4.8px] text-[12px] uppercase block text-nowrap">
+                            Available for Projects
+                        </span>
+                    </div>
                 </motion.div>
 
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* Marquee */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none z-4">
                     <motion.div
                         className="absolute top-[40%] left-1/2 -translate-x-1/2 w-[160%] text-[#FF0033] text-[100px] font-extrabold leading-[100%] tracking-[-1.6px] whitespace-nowrap uppercase"
                         animate={{ x: ["0%", "-50%"] }}
@@ -64,8 +79,9 @@ const HeroSection = () => {
                     </motion.div>
                 </div>
 
+                {/* Characters */}
                 <motion.div
-                    className="relative h-screen w-full flex items-center justify-center"
+                    className="relative h-screen w-full flex items-center justify-center z-5"
                     style={{ scale: scale }}
                 >
                     <motion.div
@@ -81,4 +97,5 @@ const HeroSection = () => {
         </div>
     )
 }
+
 export default HeroSection

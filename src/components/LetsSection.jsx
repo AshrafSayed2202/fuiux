@@ -5,7 +5,27 @@ import LetsChar1 from "../assets/images/letsChar1.png"
 import LetsChar2 from "../assets/images/letsChar2.png"
 import LetsBg1 from "../assets/images/LetsBg1.png"
 import LetsBg2 from "../assets/images/LetsBg2.png"
+import { useScrambleText } from "../hooks/useScrambleText"
+import { useState, useEffect } from "react"
+
+const texts = ["Web Design", "Mobile App", "Dashboard", "Games"]
+
 const LetsSection = () => {
+  const [index, setIndex] = useState(0)
+  const current = texts[index]
+  const { text, start } = useScrambleText(current)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % texts.length)
+    }, 5000)
+    return () => clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    start()
+  }, [current, start])
+
   return (
     <div className="bg-[#0A0A0A] relative min-h-screen flex items-center justify-center overflow-hidden!" id="contact">
       <img src={LetsBg1} alt="lets-bg-1" className="absolute top-1/2 left-1/2 object-cover translate-x-[-50%] translate-y-[-50%]" />
@@ -22,16 +42,16 @@ const LetsSection = () => {
           I'm open to freelance projects, full-time roles, and long-term <br /> partnerships. Let's make something great together.
         </p>
         <div className="flex justify-center items-center">
-          <div className="absolute flex items-center justify-center gap-2 leading-6">
+          <div className="absolute flex items-center justify-center gap-2 leading-6 pr-20">
             <span className="relative size-4">
               <span className="absolute bg-[#ff0033] w-1 h-full block top-1/2 rounded-md left-1/2 translate-x-[-50%] translate-y-[-50%]"></span>
               <span className="absolute bg-[#ff0033] w-full h-1 block top-1/2 rounded-md left-1/2 translate-x-[-50%] translate-y-[-50%]"></span>
             </span>
             <span className="text-sm text-white font-bold tracking-tight">Create</span>
             <span className="bg-[#ff0033] w-1 h-11 block rounded-md"></span>
-            <span className="text-sm text-white font-bold tracking-tight relative">
-              <p className="relative z-2">Web Product</p>
-              <span className="block absolute left-[-55%] top-1/2 translate-y-[-50%]"><LetsLight /></span>
+            <span className="relative text-sm text-white font-bold tracking-tight h-11 w-1">
+              <p className="absolute top-1/2 translate-y-[-50%] left-0 text-nowrap z-2">{text}</p>
+              <span className="block absolute -left-11 top-1/2 translate-y-[-50%]"><LetsLight /></span>
             </span>
           </div>
           <LetsButton />
