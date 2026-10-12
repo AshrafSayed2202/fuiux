@@ -9,6 +9,10 @@ import PricingSection from "./components/PricingSection.jsx"
 import CommentsSection from "./components/CommentsSection.jsx"
 import LetsSection from "./components/LetsSection.jsx"
 import Footer from "./components/Footer.jsx"
+import ProjectsPage from "./components/ProjectsPage.jsx"
+import ProjectDetail from "./components/ProjectDetail.jsx"
+import ScrollToTop from "./components/ScrollToTop.jsx"
+import NotFound from "./components/NotFound.jsx"
 
 function HomePage() {
   return (
@@ -29,11 +33,14 @@ function HomePage() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <main className="relative w-full">
         <Nav />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/projects" element={<ProjectsSection />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
     </BrowserRouter>

@@ -7,114 +7,7 @@ import hoverSound from "../assets/sounds/hover.wav"
 import clickSound from "../assets/sounds/click.wav"
 import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
 import Arrow from "../assets/svgs/Arrow"
-const PROJECTS = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
-    category: "Fintech Dashboard",
-    title: "Nova Banking Console",
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1600&q=80",
-    category: "Mobile App",
-    title: "Pulse Fitness Companion",
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=80",
-    category: "Games",
-    title: "Arcade Night Multiplayer",
-  },
-  {
-    id: 4,
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1600&q=80",
-    category: "Brand Identity",
-    title: "Lumen Visual System",
-  },
-  {
-    id: 5,
-    image: "https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=1600&q=80",
-    category: "Web Design",
-    title: "Ember Studio Website",
-  },
-  {
-    id: 6,
-    image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1600&q=80",
-    category: "Car Infotainment Design",
-    title: "Horizon EV Cockpit",
-  },
-  {
-    id: 7,
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80",
-    category: "Fintech Dashboard",
-    title: "Vault Crypto Ledger",
-  },
-  {
-    id: 8,
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1600&q=80",
-    category: "Mobile App",
-    title: "Atlas Travel Planner",
-  },
-  {
-    id: 9,
-    image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=1600&q=80",
-    category: "Games",
-    title: "Neon Racer Circuit",
-  },
-  {
-    id: 10,
-    image: "https://images.unsplash.com/photo-1634942537034-2531766767d1?auto=format&fit=crop&w=1600&q=80",
-    category: "Brand Identity",
-    title: "Meridian Identity Kit",
-  },
-  {
-    id: 11,
-    image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1600&q=80",
-    category: "Web Design",
-    title: "Apex Commerce Platform",
-  },
-  {
-    id: 12,
-    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80",
-    category: "Car Infotainment Design",
-    title: "Orion Cluster Interface",
-  },
-  {
-    id: 13,
-    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1600&q=80",
-    category: "Fintech Dashboard",
-    title: "Flow Payments Hub",
-  },
-  {
-    id: 14,
-    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=80",
-    category: "Games",
-    title: "Drift League UI",
-  },
-  {
-    id: 15,
-    image: "https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1600&q=80",
-    category: "Brand Identity",
-    title: "Craft & Co Brand World",
-  },
-  {
-    id: 16,
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80",
-    category: "Mobile App",
-    title: "Ledger Pro Wallet",
-  },
-]
-
-const FILTERS = [
-  "All",
-  "Web Design",
-  "Mobile App",
-  "Fintech Dashboard",
-  "Brand Identity",
-  "Games",
-  "Car Infotainment Design",
-]
+import { PROJECTS, FILTERS } from "../data/projects"
 
 const PAGE_SIZE = 4
 
@@ -173,12 +66,19 @@ const CardImage = ({ image, title }) => {
 }
 
 const ProjectCard = ({ project }) => {
+  const navigate = useNavigate()
   const playHover = () => {
     const audio = new Audio(secondaryHoverSound)
     audio.volume = 0.15
     audio.play().catch(() => { })
   }
   const [arrowHover, setArrowHover] = useState(false)
+
+  const handleArrowClick = (e) => {
+    e.stopPropagation()
+    navigate(`/projects/${project.id}`)
+  }
+
   return (
     <article className="group relative overflow-hidden border-b border-[#282727] duration-300 hover:border-[#FF0033]">
       <div className="relative overflow-hidden">
@@ -196,7 +96,12 @@ const ProjectCard = ({ project }) => {
           <h3 className="text-white text-4xl font-black group-hover:text-[#FF0033] duration-300">
             {project.title}
           </h3>
-          <div className="p-1 cursor-pointer hover:rotate-45 duration-300 group" onMouseEnter={() => { playHover(); setArrowHover(true) }} onMouseLeave={() => { setArrowHover(false) }}>
+          <div
+            className="p-1 cursor-pointer hover:rotate-45 duration-300 group"
+            onClick={handleArrowClick}
+            onMouseEnter={() => { playHover(); setArrowHover(true) }}
+            onMouseLeave={() => { setArrowHover(false) }}
+          >
             <Arrow hover={arrowHover} />
           </div>
         </div>
