@@ -4,6 +4,8 @@ import { motion, useScroll, useSpring } from "framer-motion"
 import { PROJECTS } from "../data/projects"
 import CardBorders from "../ui/CardBorders"
 import Footer from "./Footer"
+import ProjectArrow from "../assets/svgs/ProjectArrow"
+import KeyResults from "../assets/svgs/KeyResults"
 
 const ProjectDetail = () => {
   const { id } = useParams()
@@ -40,17 +42,17 @@ const ProjectDetail = () => {
       <div className="min-h-screen bg-[#0A0A0A] text-white">
         <div className="fixed top-0 left-0 right-0 h-1 bg-[#FF0033] origin-left z-50" />
         <main className="pt-24 md:pt-32">
-          <div className="max-w-[90rem] mx-auto px-4 sm:px-6 mb-20">
-            <div className="border border-[#ffffff14] bg-[#0A0A0A] relative">
-              <div className="grid grid-cols-1 lg:grid-cols-4 border-b border-[#ffffff14]">
-                <div className="lg:col-span-3 p-6 border-b lg:border-b-0 lg:border-r border-[#ffffff14]">
+          <div className="max-w-360 mx-auto px-4 sm:px-6 mb-20">
+            <div className=" border-[#6C061A] border-[3px] bg-[#0A0A0A] relative">
+              <div className="grid grid-cols-1 lg:grid-cols-4 border-b-[3px] border-[#6C061A] border-[3px]">
+                <div className="lg:col-span-3 p-6 border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-[#6C061A] border-[3px]">
                   <div className="h-4 w-40 bg-[#ffffff10] rounded animate-pulse" />
                 </div>
                 <div className="p-6 flex items-center justify-center">
                   <div className="h-4 w-16 bg-[#ffffff10] rounded animate-pulse" />
                 </div>
               </div>
-              <div className="p-6 md:p-12 lg:p-16 border-b border-[#ffffff14]">
+              <div className="p-6 md:p-12 lg:p-16 border-b-[3px] border-[#6C061A] border-[3px]">
                 <div className="h-16 md:h-24 w-4/5 bg-[#ffffff10] rounded-xl animate-pulse" />
                 <div className="mt-8 space-y-3 max-w-2xl">
                   <div className="h-4 bg-[#ffffff10] rounded animate-pulse" />
@@ -58,9 +60,9 @@ const ProjectDetail = () => {
                   <div className="h-4 bg-[#ffffff10] rounded animate-pulse w-4/5" />
                 </div>
               </div>
-              <div className="aspect-[16/9] md:aspect-[21/9] bg-[#ffffff08] animate-pulse" />
+              <div className="aspect-video md:aspect-21/9 bg-[#ffffff08] animate-pulse" />
               <div className="grid lg:grid-cols-12 min-h-[50vh]">
-                <div className="lg:col-span-3 border-r border-[#ffffff14] p-6 space-y-8">
+                <div className="lg:col-span-3 border-r-[3px] border-[#6C061A] border-[3px] p-6 space-y-8">
                   <div className="h-9 bg-[#ffffff10] rounded animate-pulse" />
                   <div className="flex flex-wrap gap-2">
                     <div className="h-7 w-24 bg-[#ffffff10] rounded animate-pulse" />
@@ -91,7 +93,7 @@ const ProjectDetail = () => {
             onClick={() => navigate("/projects")}
             className="bg-[#FF0033] px-6 py-3 text-white font-bold hover:bg-[#ff0033]"
           >
-            Back to Projects
+            Back to Work
           </button>
         </div>
       </div>
@@ -106,31 +108,33 @@ const ProjectDetail = () => {
       />
 
       <main className="flex-1 pt-24 md:pt-32">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 mb-20">
-          <div className="border border-[#ffffff14] bg-[#0A0A0A] relative z-10">
+        <div className="max-w-360 mx-auto px-4 sm:px-6 mb-20">
+          <div className=" bg-[#0A0A0A] relative z-10">
             {/* Top bar */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 border-b border-[#ffffff14]">
-              <div className="lg:col-span-3 p-6 border-b lg:border-b-0 lg:border-r border-[#ffffff14] flex items-center gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-4 border-[#6C061A] border-[3px] border-b-0">
+              <div className="lg:col-span-3 py-6 px-12 border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-[#6C061A] flex items-center gap-3">
                 <Link
                   to="/projects"
-                  className="group inline-flex items-center gap-2 text-sm font-medium text-white/60 hover:text-[#FF0033] transition-colors"
+                  className="group inline-flex items-center gap-3 text-sm uppercase tracking-[3.6px] text-[#FF0033] transition-colors"
                 >
-                  <span className="transition-transform group-hover:-translate-x-1">←</span>
-                  Back to Projects
+                  <span className="text-[#FF0033] transition-transform group-hover:-translate-x-1">
+                    <ProjectArrow />
+                  </span>
+                  Back to Work
                 </Link>
-                <span className="mx-2 text-white/20">/</span>
-                <span className="text-sm text-white/40 uppercase tracking-wider">
-                  {project.category}
+                <span className="text-[#FF0033]">/</span>
+                <span className="text-sm text-[#FF6467] uppercase tracking-[3.6px]">
+                  {project.title}
                 </span>
               </div>
-              <div className="p-6 flex items-center justify-between lg:justify-center text-sm font-medium text-white/80">
-                <span className="lg:hidden text-white/40 uppercase tracking-wider text-xs">Year</span>
+              <div className="p-6 flex items-center justify-between lg:justify-center text-sm font-medium text-[#FF6467] font-[inter]! relative">
+                <span className="h-14.5 w-14.5 bg-[#0a0a0a] absolute -top-6.5 -right-8.25 border-b-[3px] border-[#6C061A] rotate-50"></span>
                 <div className="font-mono">{project.year || "2024"}</div>
               </div>
             </div>
 
             {/* Title block */}
-            <div className="p-6 md:p-12 lg:p-16 border-b border-[#ffffff14]">
+            <div className="p-6 md:p-12 lg:p-16 border-b-0 border-[#6C061A] border-[3px]">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -144,39 +148,36 @@ const ProjectDetail = () => {
                 <p className="text-lg md:text-xl text-white/60 max-w-2xl leading-relaxed">
                   {project.description}
                 </p>
-                <div className="px-4 py-2 rounded-full border border-[#ffffff14] text-xs font-bold uppercase tracking-widest bg-[#ffffff08]">
+                <div className="px-4 py-2 rounded-full border-[#6C061A] border-[3px] text-xs font-bold uppercase tracking-widest bg-[#ffffff08]">
                   Case Study
                 </div>
               </div>
             </div>
 
             {/* Hero image */}
-            <div className="w-full border-b border-[#ffffff14] overflow-hidden bg-[#ffffff05]">
+            <div className="w-full border-b-[3px] border-[#6C061A] border-[3px] overflow-hidden bg-[#ffffff05]">
               <motion.div
                 initial={{ scale: 1.05, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.8 }}
-                className="aspect-[16/9] md:aspect-[21/9] w-full relative"
+                className="aspect-video md:aspect-21/9 w-full relative"
               >
                 <img
                   src={project.image}
                   alt={project.title}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
                 <CardBorders touchy={true} />
               </motion.div>
             </div>
 
             {/* Sidebar + Content */}
             <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[50vh]">
-              <div className="lg:col-span-3 border-r border-[#ffffff14]">
+              <div className="lg:col-span-3 border-r-[3px] border-t-0 border-[#6C061A] border-[3px] pb-10 relative">
                 <div className="sticky top-24">
                   <div className="flex flex-col">
-                    <div className="p-6 border-b border-[#ffffff14] relative group hover:bg-[#ffffff05] transition-colors">
-                      <span className="absolute top-6 right-6 text-[10px] font-mono text-[#FF0033] opacity-0 group-hover:opacity-100 transition-opacity">
-                        01
-                      </span>
+                    <div className="p-6 border-b-[3px] border-[#6C061A] relative group transition-colors">
                       <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-3">
                         Client
                       </h4>
@@ -185,29 +186,28 @@ const ProjectDetail = () => {
                       </p>
                     </div>
 
-                    <div className="p-6 relative group hover:bg-[#ffffff05] transition-colors">
-                      <span className="absolute top-6 right-6 text-[10px] font-mono text-[#FF0033] opacity-0 group-hover:opacity-100 transition-opacity">
-                        02
-                      </span>
+                    <div className="p-6 relative transition-colors">
                       <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-4">
                         Scope of Work
                       </h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2.25">
                         {(project.scope || []).map((item, idx) => (
                           <span
                             key={idx}
-                            className="inline-block px-3 py-1 border border-[#ffffff14] text-[11px] font-mono uppercase tracking-wide rounded-sm text-white/70 hover:border-[#FF0033] hover:text-[#FF0033] transition-colors"
+                            className="rounded-lg border border-[#ffffff0d] bg-[#ffffff05] text-[#ffffff80] text-[12px] hover:text-[#FF0033] duration-500 px-3 py-1.5 cursor-pointer relative overflow-hidden group"
                           >
                             {item}
+                            <CardBorders />
                           </span>
                         ))}
                       </div>
                     </div>
                   </div>
                 </div>
+                <span className="h-14.5 w-14.5 bg-[#0a0a0a] absolute -bottom-6.5 -left-8.25 border-t-[3px] border-[#6C061A] rotate-50"></span>
               </div>
 
-              <div className="lg:col-span-9 p-6 md:p-12 lg:p-16">
+              <div className="lg:col-span-9 p-6 md:p-12 lg:p-16 border-r-[3px] border-b-[3px] border-[#6C061A]">
                 <motion.article
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -223,10 +223,11 @@ const ProjectDetail = () => {
                   ))}
 
                   {project.keyResults?.length > 0 && (
-                    <div className="my-16 p-8 border border-[#ffffff14] bg-[#ffffff05]">
+                    <div className="my-16">
                       <h4 className="text-sm font-bold uppercase tracking-widest text-[#FF0033] mb-8">
                         Key Results
                       </h4>
+                      <KeyResults />
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {project.keyResults.map((result, i) => {
                           const parts = result.split(" ")
@@ -265,7 +266,7 @@ const ProjectDetail = () => {
                       {project.gallery.map((src, i) => (
                         <div
                           key={i}
-                          className={`group relative overflow-hidden bg-[#ffffff05] border border-[#ffffff0d] ${i === 0 ? "md:col-span-2 aspect-[21/9]" : "aspect-square"
+                          className={`group relative overflow-hidden bg-[#ffffff05] border border-[#ffffff0d] ${i === 0 ? "md:col-span-2 aspect-21/9" : "aspect-square"
                             }`}
                         >
                           <img
@@ -318,8 +319,8 @@ const ProjectDetail = () => {
         </div>
 
         {/* Next project */}
-        <section className="border-t border-[#ffffff14] bg-[#ffffff05] py-20">
-          <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
+        <section className=" py-20">
+          <div className="max-w-360 mx-auto px-4 sm:px-6">
             <div className="flex items-end justify-between mb-12">
               <h2 className="text-3xl md:text-4xl font-black uppercase">Next Project</h2>
               <Link
@@ -333,10 +334,10 @@ const ProjectDetail = () => {
             {nextProject ? (
               <Link
                 to={`/projects/${nextProject.id}`}
-                className="group block border border-[#ffffff14] bg-[#0A0A0A] p-8 hover:border-[#FF0033] transition-colors relative overflow-hidden"
+                className="group block border-[#6C061A] border-[3px] bg-[#0A0A0A] p-8 hover:border-[#FF0033] transition-colors relative overflow-hidden"
               >
                 <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div className="aspect-[16/9] overflow-hidden bg-[#ffffff05] relative">
+                  <div className="aspect-video overflow-hidden bg-[#ffffff05] relative">
                     <img
                       src={nextProject.image}
                       alt={nextProject.title}
