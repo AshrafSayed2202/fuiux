@@ -224,25 +224,30 @@ const ProjectDetail = () => {
 
                   {project.keyResults?.length > 0 && (
                     <div className="my-16">
-                      <h4 className="text-sm font-bold uppercase tracking-widest text-[#FF0033] mb-8">
-                        Key Results
-                      </h4>
-                      <KeyResults />
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {project.keyResults.map((result, i) => {
-                          const parts = result.split(" ")
-                          return (
-                            <div key={i}>
-                              <span className="block text-4xl md:text-5xl font-black mb-2">
-                                {parts[0]}
-                              </span>
-                              <span className="text-xs font-mono uppercase tracking-widest text-white/60">
-                                {parts.slice(1).join(" ")}
-                              </span>
-                            </div>
-                          )
-                        })}
+                      <div className="w-228.75 h-97.5 relative">
+                        <div className="absolute z-[-1]">
+                          <KeyResults />
+                        </div>
+                        <h4 className="text-2xl font-extrabold text-white absolute left-[3%] top-[8%]">
+                          Key Results
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] px-6 md:px-0">
+                          {project.keyResults.map((result, i) => {
+                            const parts = result.split(" ")
+                            return (
+                              <div key={i}>
+                                <span className="block text-4xl md:text-5xl font-black mb-2">
+                                  {parts[0]}
+                                </span>
+                                <span className="text-xs font-mono uppercase tracking-widest text-white/60">
+                                  {parts.slice(1).join(" ")}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
+
                     </div>
                   )}
                 </motion.article>
@@ -366,7 +371,7 @@ const ProjectDetail = () => {
           </div>
         </section>
       </main>
-      <Footer/>
+      <Footer />
     </div>
   )
 }
