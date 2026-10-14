@@ -54,15 +54,15 @@ const ToolsSection = () => {
               className="grid grid-cols-3 gap-5 ml-auto"
               style={{ opacity: cardsOpacity, x: cardsX }}
             >
-              <ToolCard size="55.75" icon={<FigmaTool />} text="Figma" percentage={98} />
-              <ToolCard size="55.75" icon={<ClaudeTool />} text="Claude" percentage={90} />
-              <ToolCard size="55.75" isBlanc={true} />
-              <ToolCard size="55.75" icon={<IllustratorTool />} text="Illustrator" percentage={93} />
-              <ToolCard size="55.75" icon={<InvisionTool />} text="Invision" percentage={85} />
-              <ToolCard size="55.75" icon={<PhotoshopTool />} text="Photoshop" percentage={88} />
-              <ToolCard size="55.75" isBlanc={true} />
-              <ToolCard size="55.75" icon={<BlenderTool />} text="Blender" percentage={80} />
-              <ToolCard size="55.75" icon={<SketchTool />} text="Sketch" percentage={95} />
+              <ToolCard size="223" icon={<FigmaTool />} text="Figma" percentage={98} />
+              <ToolCard size="223" icon={<ClaudeTool />} text="Claude" percentage={90} />
+              <ToolCard size="223" isBlanc={true} />
+              <ToolCard size="223" icon={<IllustratorTool />} text="Illustrator" percentage={93} />
+              <ToolCard size="223" icon={<InvisionTool />} text="Invision" percentage={85} />
+              <ToolCard size="223" icon={<PhotoshopTool />} text="Photoshop" percentage={88} />
+              <ToolCard size="223" isBlanc={true} />
+              <ToolCard size="223" icon={<BlenderTool />} text="Blender" percentage={80} />
+              <ToolCard size="223" icon={<SketchTool />} text="Sketch" percentage={95} />
             </motion.div>
           </div>
         </motion.div>

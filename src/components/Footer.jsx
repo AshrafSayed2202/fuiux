@@ -61,22 +61,22 @@ const Footer = () => {
             <h1 className="text-[65px] left-0 translate-y-[-270%] bottom-0 translate-x-[-56%]  absolute -rotate-90 text-white opacity-80 font-bold uppercase">
               info<span className="text-[#FF0033]">@</span>fuiux.com
             </h1>
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={<YouTubeVec />} text="youtube" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={<BehanceVec />} text="behance" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={<FigmaTool />} text="Figma" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={<LinkedInVec />} text="linkedin" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={<DribbleVec />} text="dribbble" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={<MailVec />} text="Info@fuiux.com" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={<InstagramVec />} text="instagram" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
-            <ToolCard size="63.5" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={<YouTubeVec />} text="youtube" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={<BehanceVec />} text="behance" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={<FigmaTool />} text="Figma" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={<LinkedInVec />} text="linkedin" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={<DribbleVec />} text="dribbble" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={<MailVec />} text="Info@fuiux.com" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={<InstagramVec />} text="instagram" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
+            <ToolCard size="254" bigDot={true} icon={""} text="" percentage={0} />
           </div>
           <div className="w-1/2 flex flex-col h-full gap-4 items-center justify-end pb-7">
             <div className="mb-5 group">
