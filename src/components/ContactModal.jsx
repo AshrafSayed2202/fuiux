@@ -2,7 +2,14 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import CardBorders from "../ui/CardBorders"
 import Toast from "./Toast"
-
+import ContactBorders from "../assets/svgs/ContactBorders"
+import ContactXContainer from "../assets/svgs/ContactXContainer"
+import ContactHeaderBg from "../assets/svgs/ContactHeaderBg"
+import ContactFormBg from "../assets/svgs/ContactFormBg"
+import vector from "../assets/images/form-vector.png"
+import ContactInput1 from "../assets/svgs/ContactInput1"
+import ContactInput2 from "../assets/svgs/ContactInput2"
+import ContactTextarea from "../assets/svgs/ContactTextarea"
 const ContactModal = ({ isOpen, onClose, onSubmit }) => {
   const [form, setForm] = useState({
     firstName: "",
@@ -99,130 +106,152 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            className="fixed inset-0 z-100 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
+            <img src={vector} alt="Vector" className="absolute top-0 left-0 w-full h-full object-cover pointer-events-none" />
             <motion.div
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
               onClick={onClose}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             />
-
-            <motion.div
-              className="relative w-full max-w-[540px] bg-[#0A0A0A]/95 border border-[#FF0033]/40 shadow-[0_0_40px_rgba(255,0,51,0.25)]"
+            <motion.div 
+              className="w-206.25 h-153.5 relative"
               initial={{ opacity: 0, scale: 0.92, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", stiffness: 320, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="pointer-events-none absolute -top-px -left-px h-6 w-6 border-t-2 border-l-2 border-[#FF0033]" />
-              <div className="pointer-events-none absolute -top-px -right-px h-6 w-6 border-t-2 border-r-2 border-[#FF0033]" />
-              <div className="pointer-events-none absolute -bottom-px -left-px h-6 w-6 border-b-2 border-l-2 border-[#FF0033]" />
-              <div className="pointer-events-none absolute -bottom-px -right-px h-6 w-6 border-b-2 border-r-2 border-[#FF0033]" />
-
-              <div className="relative flex items-stretch border-b border-[#FF0033]/30 bg-linear-to-r from-[#FF0033]/15 via-[#FF0033]/5 to-transparent">
-                <div className="flex-1 px-6 py-4">
-                  <h2 className="text-xl font-black tracking-tight text-white">Let’s Contact</h2>
-                  <p className="mt-1 text-xs text-white/60">
-                    Get in touch with us and let our Combined creativity shine.
-                  </p>
-                </div>
+              <div className="absolute">
+                <ContactBorders />
+              </div>
+              <div className="absolute right-[1.5%] top-[5%]">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex w-14 items-center justify-center border-l border-[#FF0033]/40 bg-[#FF0033] text-white transition-colors hover:bg-[#ff1a4a]"
+                  className="flex cursor-pointer   absolute right-[12%] top-[10%] items-center justify-center text-white"
                   aria-label="Close"
                 >
-                  <span className="text-lg font-bold leading-none">✕</span>
+                  <span className="text-3xl font-bold leading-none">✕</span>
                 </button>
+                <ContactXContainer />
               </div>
+              <div className="absolute left-[6%] top-[6.5%]">
+                <div className="flex-1 px-6 py-4 absolute left-[5%]">
+                  <h2 className="text-2xl font-bold text-white">Let’s Contact</h2>
+                  <p className="mt-1.5 text-base text-white/60">
+                    Get in touch with us and let our Combined creativity shine.
+                  </p>
+                </div>
+                <ContactHeaderBg />
+              </div>
+              <div className="absolute left-[4.75%] top-[17.5%]">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-12 absolute w-full mt-10">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="absolute select-none z-1">
+                        <ContactInput1 />
+                      </div>
+                      <input
+                        name="firstName"
+                        value={form.firstName}
+                        onChange={handleChange}
+                        placeholder="First name"
+                        className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.firstName ? "border-[#FF0033]" : "border-[#ffffff14]"
+                          }`}
+                      />
+                      {errors.firstName && (
+                        <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.firstName}</span>
+                      )}
+                    </div>
+                    <div>
+                      <div className="absolute select-none z-1">
+                        <ContactInput1 />
+                      </div>
+                      <input
+                        name="lastName"
+                        value={form.lastName}
+                        onChange={handleChange}
+                        placeholder="Last name"
+                        className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.lastName ? "border-[#FF0033]" : "border-[#ffffff14]"
+                          }`}
+                      />
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
-                <div className="grid grid-cols-2 gap-3">
+                      {errors.lastName && (
+                        <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.lastName}</span>
+                      )}
+                    </div>
+                  </div>
+
                   <div>
+                    <div className="absolute select-none z-1">
+                      <ContactInput2 />
+                    </div>
                     <input
-                      name="firstName"
-                      value={form.firstName}
+                      name="email"
+                      type="email"
+                      value={form.email}
                       onChange={handleChange}
-                      placeholder="First name"
-                      className={`w-full bg-[#ffffff08] border px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.firstName ? "border-[#FF0033]" : "border-[#ffffff14]"
+                      placeholder="Email"
+                      className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.email ? "border-[#FF0033]" : "border-[#ffffff14]"
                         }`}
                     />
-                    {errors.firstName && (
-                      <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.firstName}</span>
+                    {errors.email && (
+                      <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.email}</span>
                     )}
                   </div>
+
                   <div>
+                    <div className="absolute select-none z-1">
+                      <ContactInput2 />
+                    </div>
                     <input
-                      name="lastName"
-                      value={form.lastName}
+                      name="phone"
+                      type="tel"
+                      value={form.phone}
                       onChange={handleChange}
-                      placeholder="Last name"
-                      className={`w-full bg-[#ffffff08] border px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.lastName ? "border-[#FF0033]" : "border-[#ffffff14]"
+                      placeholder="Phone number"
+                      className="w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033]"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="absolute select-none z-1">
+                      <ContactTextarea />
+                    </div>
+                    <textarea
+                      name="message"
+                      value={form.message}
+                      onChange={handleChange}
+                      placeholder="Message"
+                      rows={4}
+                      className={`w-full resize-none px-4 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.message ? "border-[#FF0033]" : "border-[#ffffff14]"
                         }`}
                     />
-                    {errors.lastName && (
-                      <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.lastName}</span>
+                    {errors.message && (
+                      <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.message}</span>
                     )}
                   </div>
-                </div>
 
-                <div>
-                  <input
-                    name="email"
-                    type="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="Email"
-                    className={`w-full bg-[#ffffff08] border px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.email ? "border-[#FF0033]" : "border-[#ffffff14]"
-                      }`}
-                  />
-                  {errors.email && (
-                    <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.email}</span>
-                  )}
-                </div>
-
-                <input
-                  name="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="Phone number"
-                  className="w-full bg-[#ffffff08] border border-[#ffffff14] px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033]"
-                />
-
-                <div>
-                  <textarea
-                    name="message"
-                    value={form.message}
-                    onChange={handleChange}
-                    placeholder="Message"
-                    rows={4}
-                    className={`w-full resize-none bg-[#ffffff08] border px-4 py-3 text-sm text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.message ? "border-[#FF0033]" : "border-[#ffffff14]"
-                      }`}
-                  />
-                  {errors.message && (
-                    <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.message}</span>
-                  )}
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="relative mt-2 w-full overflow-hidden bg-[#FF0033] py-4 text-xs font-bold uppercase tracking-[0.15em] text-white transition-all hover:bg-[#ff1a4a] disabled:opacity-60"
-                >
-                  <span className="absolute -left-4 -bottom-4 h-8 w-8 rotate-45 bg-[#0A0A0A]" />
-                  <span className="absolute -right-4 -top-4 h-8 w-8 rotate-45 bg-[#0A0A0A]" />
-                  {isSubmitting ? "Sending..." : "Send it to make a game"}
-                  <CardBorders byHover={false} active={false} />
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="relative mt-2 cursor-pointer w-full overflow-hidden bg-[#FF0033] py-4 text-xs font-bold uppercase tracking-[0.15em] text-white transition-all hover:bg-[#ff1a4a] disabled:opacity-60"
+                  >
+                    <span className="absolute -left-4 -bottom-4 h-8 w-8 rotate-45 bg-[#2d0810]" />
+                    <span className="absolute -right-4 -top-4 h-8 w-8 rotate-45 bg-[#2d0810]" />
+                    {isSubmitting ? "Sending..." : "Send it to make a game"}
+                    <CardBorders byHover={false} active={false} />
+                  </button>
+                </form>
+                <ContactFormBg />
+              </div>
             </motion.div>
           </motion.div>
         )}
