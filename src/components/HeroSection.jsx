@@ -7,11 +7,9 @@ const HeroSection = () => {
         offset: ["start start", "end end"]
     })
 
-    // Main scale + text finish early
     const scale = useTransform(scrollYProgress, [0, 0.2, 1], [1.1, 0.35, 0.38])
     const textOpacity = useTransform(scrollYProgress, [0, 0.2, 1], [1, 0, 0])
 
-    // Logo full animation between 0.2 → 0.45 (fully done before exit starts)
     const logoOpacity = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.38], [0, 0, 1, 1])
     const logoScale = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.40], [2.5, 2.5, 1.15, 0.8])
 
@@ -21,7 +19,6 @@ const HeroSection = () => {
     return (
         <div className="h-[700vh]" id="home">
             <div className="w-full sticky top-0 z-10 flex items-center justify-center overflow-hidden bg-zinc-950">
-                {/* Side Texts */}
                 <motion.div
                     className="absolute z-50 top-1/2 -translate-y-1/2 left-0 text-center rotate-270 tracking-[4.8px] text-[12px] select-none uppercase text-[#ffffff26] pointer-events-none"
                     style={{ opacity: textOpacity }}
@@ -35,7 +32,6 @@ const HeroSection = () => {
                     Based in Cairo,egypt — 2026
                 </motion.div>
 
-                {/* Logo */}
                 <motion.div
                     className="absolute z-50 top-1/10 left-1/2 -translate-x-1/2 select-none pointer-events-none"
                     style={{ opacity: logoOpacity, scale: logoScale }}
@@ -43,7 +39,6 @@ const HeroSection = () => {
                     <HeroLogo />
                 </motion.div>
 
-                {/* Scroll indicator */}
                 <motion.div
                     className="absolute z-50 bottom-0 left-1/2 -translate-y-1/2 -translate-x-1/2 text-center select-none uppercase flex flex-col items-center gap-2 justify-center pointer-events-none"
                     style={{ opacity: textOpacity }}
@@ -60,8 +55,7 @@ const HeroSection = () => {
                     </div>
                 </motion.div>
 
-                {/* Marquee */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none z-4">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
                     <motion.div
                         className="absolute top-[40%] left-1/2 -translate-x-1/2 w-[160%] text-[#FF0033] text-[100px] font-extrabold leading-[100%] tracking-[-1.6px] whitespace-nowrap uppercase"
                         animate={{ x: ["0%", "-50%"] }}
@@ -79,9 +73,8 @@ const HeroSection = () => {
                     </motion.div>
                 </div>
 
-                {/* Characters */}
                 <motion.div
-                    className="relative h-screen w-full flex items-center justify-center z-5"
+                    className="relative h-screen w-full flex items-center justify-center z-10"
                     style={{ scale: scale }}
                 >
                     <motion.div

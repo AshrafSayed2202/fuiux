@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
-import { motion, useScroll, useSpring } from "framer-motion"
+import { motion, useScroll, useSpring, AnimatePresence, useMotionValueEvent } from "framer-motion"
 import { PROJECTS } from "../data/projects"
 import CardBorders from "../ui/CardBorders"
 import Footer from "./Footer"
 import ProjectArrow from "../assets/svgs/ProjectArrow"
 import KeyResults from "../assets/svgs/KeyResults"
+import Arrow from "../assets/svgs/Arrow"
 
 const ProjectDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [loadedId, setLoadedId] = useState(null)
   const loading = loadedId !== id
+  const [showScrollTop, setShowScrollTop] = useState(false)
 
   const project = useMemo(
     () => PROJECTS.find((p) => String(p.id) === String(id)),
@@ -24,11 +26,15 @@ const ProjectDetail = () => {
     return idx < PROJECTS.length - 1 ? PROJECTS[idx + 1] : null
   }, [project])
 
-  const { scrollYProgress } = useScroll()
+  const { scrollYProgress, scrollY } = useScroll()
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
+  })
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setShowScrollTop(latest > 400)
   })
 
   useEffect(() => {
@@ -110,7 +116,6 @@ const ProjectDetail = () => {
       <main className="flex-1 pt-24 md:pt-32">
         <div className="max-w-360 mx-auto px-4 sm:px-6 mb-20">
           <div className=" bg-[#0A0A0A] relative z-10">
-            {/* Top bar */}
             <div className="grid grid-cols-1 lg:grid-cols-4 border-[#6C061A] border-[3px] border-b-0">
               <div className="lg:col-span-3 py-6 px-12 border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-[#6C061A] flex items-center gap-3">
                 <Link
@@ -133,7 +138,6 @@ const ProjectDetail = () => {
               </div>
             </div>
 
-            {/* Title block */}
             <div className="p-6 md:p-12 lg:p-16 border-b-0 border-[#6C061A] border-[3px]">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
@@ -154,7 +158,6 @@ const ProjectDetail = () => {
               </div>
             </div>
 
-            {/* Hero image */}
             <div className="w-full border-b-[3px] border-[#6C061A] border-[3px] overflow-hidden bg-[#ffffff05]">
               <motion.div
                 initial={{ scale: 1.05, opacity: 0 }}
@@ -172,12 +175,11 @@ const ProjectDetail = () => {
               </motion.div>
             </div>
 
-            {/* Sidebar + Content */}
             <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[50vh]">
               <div className="lg:col-span-3 border-r-[3px] border-t-0 border-[#6C061A] border-[3px] pb-10 relative">
                 <div className="sticky top-24">
                   <div className="flex flex-col">
-                    <div className="p-6 border-b-[3px] border-[#6C061A] relative group transition-colors">
+                    <div className="p-6 border-b-[3px] border-[#6C061A] relative group hover:bg-[#FF003333] transition-colors">
                       <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-3">
                         Client
                       </h4>
@@ -186,7 +188,7 @@ const ProjectDetail = () => {
                       </p>
                     </div>
 
-                    <div className="p-6 relative transition-colors">
+                    <div className="p-6 relative transition-colors hover:bg-[#FF003333]">
                       <h4 className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-4">
                         Scope of Work
                       </h4>
@@ -247,12 +249,10 @@ const ProjectDetail = () => {
                           })}
                         </div>
                       </div>
-
                     </div>
                   )}
                 </motion.article>
 
-                {/* Gallery */}
                 {project.gallery?.length > 0 && (
                   <div className="mt-12">
                     <div className="flex items-end justify-between mb-16">
@@ -280,9 +280,6 @@ const ProjectDetail = () => {
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                            <div className="px-4 py-2 bg-[#0A0A0A] text-white text-xs font-bold uppercase tracking-widest transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                              View
-                            </div>
                           </div>
                           <CardBorders touchy={true} />
                         </div>
@@ -291,7 +288,6 @@ const ProjectDetail = () => {
                   </div>
                 )}
 
-                {/* Insights */}
                 {project.insights && (
                   <div className="mt-24 relative overflow-hidden bg-[#FF0033] text-white p-8 md:p-12">
                     <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
@@ -323,7 +319,6 @@ const ProjectDetail = () => {
           </div>
         </div>
 
-        {/* Next project */}
         <section className=" py-20">
           <div className="max-w-360 mx-auto px-4 sm:px-6">
             <div className="flex items-end justify-between mb-12">
@@ -372,6 +367,23 @@ const ProjectDetail = () => {
         </section>
       </main>
       <Footer />
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="fixed bottom-8 right-8 z-50 w-12 h-12 rounded-full bg-[#FF0033] text-white flex items-center justify-center shadow-lg hover:bg-[#ff0033] transition-colors cursor-pointer"
+          >
+            <span className="-rotate-45">
+            <Arrow/>
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

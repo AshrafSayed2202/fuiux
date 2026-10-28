@@ -46,8 +46,7 @@ const FilterButton = ({ text, isActive, onClick }) => {
 const CardImage = ({ image, title }) => {
   return (
     <div className="relative overflow-hidden border border-[#ffffff0d] rounded-2xl">
-      <div className="w-full h-full bg-linear-360 from-black via-black/60 to-black/5 absolute z-5 group-hover:opacity-0 duration-300" />
-      <div className="w-full h-full bg-linear-360 from-rose-600/10 via-rose-600/5 to-rose-600/0 absolute z-5 opacity-0 group-hover:opacity-100 duration-300" />
+      <div className="w-full h-full bg-linear-360 from-black via-black/60 to-black/5 absolute z-5 duration-300" />
       <img
         src={image}
         alt={title}
@@ -67,13 +66,13 @@ const ProjectCard = ({ project }) => {
   }
   const [arrowHover, setArrowHover] = useState(false)
 
-  const handleArrowClick = (e) => {
-    e.stopPropagation()
-    navigate(`/projects/${project.id}`)
-  }
-
   return (
-    <article className="group relative overflow-hidden border-b border-[#282727] duration-300 hover:border-[#FF0033]">
+    <article
+      className="group relative overflow-hidden border-b border-[#282727] duration-300 hover:border-[#FF0033] cursor-pointer"
+      onClick={() => navigate(`/projects/${project.id}`)}
+      onMouseEnter={() => { playHover(); setArrowHover(true) }}
+      onMouseLeave={() => { setArrowHover(false) }}
+    >
       <div className="relative overflow-hidden">
         <CardImage image={project.image} title={project.title} />
       </div>
@@ -89,12 +88,7 @@ const ProjectCard = ({ project }) => {
           <h3 className="text-white text-4xl font-black group-hover:text-[#FF0033] duration-300">
             {project.title}
           </h3>
-          <div
-            className="p-1 cursor-pointer hover:rotate-45 duration-300 group"
-            onClick={handleArrowClick}
-            onMouseEnter={() => { playHover(); setArrowHover(true) }}
-            onMouseLeave={() => { setArrowHover(false) }}
-          >
+          <div className="p-1 group-hover:translate-x-2 group-hover:translate-y-0 translate-x-0 translate-y-2 duration-300">
             <Arrow hover={arrowHover} />
           </div>
         </div>

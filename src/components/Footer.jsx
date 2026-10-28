@@ -29,9 +29,9 @@ const FooterNavItem = ({ title, link }) => {
         onMouseEnter={start}
         onMouseLeave={stop}
         onClick={click}
-        className="text-white font-extrabold uppercase w-64.25 h-10 duration-300 group"
+        className="text-white font-extrabold uppercase w-64.25 h-10 duration-800 ease-out group"
       >
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover:opacity-100 duration-300">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-hover:opacity-100 duration-800 ease-out">
           <LinkHoverFooter />
         </div>
         {title}
@@ -51,7 +51,7 @@ const Footer = () => {
     { title: "CONTACT ME", link: "#contact" }
   ]
   return (
-    <div className="bg-[#0A0A0A] relative h-screen overflow-hidden!">
+    <div className="bg-[#0A0A0A] relative h-screen overflow-hidden! z-20" style={{ marginTop: "-100vh" }}>
       <img src={footerBg1} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />
       <img src={footerBg2} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />
       <img src={footerBg3} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />
@@ -92,8 +92,8 @@ const Footer = () => {
           <div className="container flex items-center h-full justify-between text-white text-base font-extrabold">
             <div><span className="text-[#FF0033]">F</span>UIUX<span className="text-gray-500 text-xl">&copy;</span> {new Date().getFullYear()}.All Rights Reserved</div>
             <div className="flex items-center gap-6">
-              <span className="hover:underline cursor-pointer">Privacy Policy</span>
-              <span className="hover:underline cursor-pointer">Terms</span>
+              <span className="hover:text-[#FF0033] cursor-pointer">Privacy Policy</span>
+              <span className="hover:text-[#FF0033] cursor-pointer">Terms</span>
             </div>
           </div>
         </div>

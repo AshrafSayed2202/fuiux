@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
 import CardBorders from "../ui/CardBorders"
 import Header from "../ui/Header"
 import { useScrambleText } from "../hooks/useScrambleText"
@@ -53,14 +54,12 @@ const FilterButton = ({ text, isActive, onClick }) => {
 const CardImage = ({ image, title }) => {
   return (
     <div className="relative overflow-hidden border border-[#ffffff0d] rounded-2xl">
-      <div className="w-full h-full bg-linear-360 from-black via-black/60 to-black/5 absolute z-5 group-hover:opacity-0 duration-300" />
-      <div className="w-full h-full bg-linear-360 from-rose-600/10 via-rose-600/5 to-rose-600/0 absolute z-5 opacity-0 group-hover:opacity-100 duration-300" />
+      <div className="w-full h-full bg-linear-360 from-black via-black/60 to-black/5 absolute z-5 duration-300" />
       <img
         src={image}
         alt={title}
         className="aspect-4/3 group-hover:scale-105 duration-300"
       />
-      <CardBorders touchy={true} />
     </div>
   )
 }
@@ -74,13 +73,13 @@ const ProjectCard = ({ project }) => {
   }
   const [arrowHover, setArrowHover] = useState(false)
 
-  const handleArrowClick = (e) => {
-    e.stopPropagation()
-    navigate(`/projects/${project.id}`)
-  }
-
   return (
-    <article className="group relative overflow-hidden border-b border-[#282727] duration-300 hover:border-[#FF0033]">
+    <article
+      className="group relative overflow-hidden border-b border-[#282727] duration-300 hover:border-[#FF0033] cursor-pointer"
+      onClick={() => navigate(`/projects/${project.id}`)}
+      onMouseEnter={() => { playHover(); setArrowHover(true) }}
+      onMouseLeave={() => { setArrowHover(false) }}
+    >
       <div className="relative overflow-hidden">
         <CardImage image={project.image} title={project.title} />
       </div>
@@ -96,12 +95,7 @@ const ProjectCard = ({ project }) => {
           <h3 className="text-white text-4xl font-black group-hover:text-[#FF0033] duration-300">
             {project.title}
           </h3>
-          <div
-            className="p-1 cursor-pointer hover:rotate-45 duration-300 group"
-            onClick={handleArrowClick}
-            onMouseEnter={() => { playHover(); setArrowHover(true) }}
-            onMouseLeave={() => { setArrowHover(false) }}
-          >
+          <div className="p-1 group-hover:translate-x-2 group-hover:translate-y-0 translate-x-0 translate-y-2 duration-300">
             <Arrow hover={arrowHover} />
           </div>
         </div>
@@ -126,7 +120,7 @@ const ViewMoreButton = ({ onClick }) => {
         click()
         onClick?.()
       }}
-      className="bg-[#FF0033CC] px-15 py-5 text-sm text-white font-bold cursor-pointer hover:bg-[#ff0033] duration-300 relative overflow-hidden w-54 h-15 text-nowrap"
+      className="bg-linear-to-r from-red-800 to-rose-600 px-15 py-5 text-sm text-white font-bold cursor-pointer hover:bg-[#ff0033] duration-300 relative overflow-hidden w-54 h-15 text-nowrap"
     >
       <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -left-5 -bottom-5 rotate-45"></span>
       <span className=" bg-[#0A0A0A] block absolute h-10 w-10 -right-5 -top-5 rotate-45"></span>
@@ -185,13 +179,32 @@ const ProjectsSection = () => {
   return (
     <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!" id="work">
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
-        <Header header="Selected Work" />
-        <h1 className="text-[80px] font-extrabold text-white leading-[100%] tracking-[-1.6px]">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <Header header="Selected Work" />
+        </motion.div>
+        <motion.h1
+          className="text-[80px] font-extrabold text-white leading-[100%] tracking-[-1.6px]"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+        >
           Projects that
           <span className="neon-text"> define</span> me.
-        </h1>
+        </motion.h1>
         <div className="flex flex-col gap-16">
-          <div className="flex flex-wrap gap-2.25">
+          <motion.div
+            className="flex flex-wrap gap-2.25"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+          >
             {FILTERS.map((filter) => (
               <FilterButton
                 key={filter}
@@ -200,31 +213,55 @@ const ProjectsSection = () => {
                 onClick={() => handleFilterClick(filter)}
               />
             ))}
-          </div>
+          </motion.div>
           {isLoading ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {Array.from({ length: PAGE_SIZE }).map((_, index) => (
-                <div
+                <motion.div
                   key={index}
                   className="h-105 animate-pulse rounded-2xl bg-[#ffffff08] border border-[#ffffff14]"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.1 }}
                 />
               ))}
             </div>
           ) : projects.length ? (
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+              {projects.map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.6, ease: "easeOut", delay: index * 0.12 }}
+                >
+                  <ProjectCard project={project} />
+                </motion.div>
               ))}
             </div>
           ) : (
-            <p className="text-[#ffffff80] text-[16px]">
+            <motion.p
+              className="text-[#ffffff80] text-[16px]"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
               No projects match the selected filters.
-            </p>
+            </motion.p>
           )}
           {!isLoading && hasMore && (
-            <div className="flex justify-center">
+            <motion.div
+              className="flex justify-center"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+            >
               <ViewMoreButton onClick={handleViewMore} />
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

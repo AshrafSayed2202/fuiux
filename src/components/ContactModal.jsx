@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import CardBorders from "../ui/CardBorders"
-import Toast from "./Toast"
 import ContactBorders from "../assets/svgs/ContactBorders"
 import ContactXContainer from "../assets/svgs/ContactXContainer"
 import ContactHeaderBg from "../assets/svgs/ContactHeaderBg"
@@ -10,6 +9,10 @@ import vector from "../assets/images/form-vector.png"
 import ContactInput1 from "../assets/svgs/ContactInput1"
 import ContactInput2 from "../assets/svgs/ContactInput2"
 import ContactTextarea from "../assets/svgs/ContactTextarea"
+import InputErrorIcon from "../assets/svgs/InputErrorIcon"
+import ToastSucces from "../assets/svgs/ToastSucces"
+import ToastError from "../assets/svgs/ToastError"
+
 const ContactModal = ({ isOpen, onClose, onSubmit }) => {
   const [form, setForm] = useState({
     firstName: "",
@@ -73,7 +76,7 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
     const nextErrors = validate()
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors)
-      showToast("error", "Error", "Please fill in all required fields.")
+      showToast("error", "Error", "Something went wrong. Please try again in a moment.")
       return
     }
     setIsSubmitting(true)
@@ -95,13 +98,31 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
 
   return (
     <>
-      <Toast
-        open={toast.open}
-        type={toast.type}
-        title={toast.title}
-        message={toast.message}
-        onClose={() => setToast((prev) => ({ ...prev, open: false }))}
-      />
+      <AnimatePresence>
+        {toast.open && (
+          <motion.div
+            className="fixed inset-0 z-200 flex top-4 justify-center pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="relative w-[min(90vw,638px)]"
+              initial={{ clipPath: "inset(0 100% 0 0)" }}
+              animate={{ clipPath: "inset(0 0% 0 0)" }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {toast.type === "success" ? <ToastSucces /> : <ToastError />}
+              <div className="absolute inset-0 flex flex-col px-16 pointer-events-none">
+                <h3 className="text-xl font-bold text-white leading-tight pt-1">{toast.title}</h3>
+                <p className="mt-1.5 text-[16px] text-white/80 text-nowrap pt-3">{toast.message}</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isOpen && (
@@ -154,44 +175,45 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
               <div className="absolute left-[4.75%] top-[17.5%]">
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-12 absolute w-full mt-10">
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
+                    <div className="relative">
                       <div className="absolute select-none z-1">
-                        <ContactInput1 />
+                        <ContactInput1 error={!!errors.firstName} />
                       </div>
                       <input
                         name="firstName"
                         value={form.firstName}
                         onChange={handleChange}
                         placeholder="First name"
-                        className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.firstName ? "border-[#FF0033]" : "border-[#ffffff14]"
-                          }`}
+                        className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.firstName ? "border-[#FF0033]" : "border-[#ffffff14]"}`}
                       />
                       {errors.firstName && (
-                        <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.firstName}</span>
+                        <div className="absolute right-4 top-1/2 translate-y-[-25%] z-3 pointer-events-none">
+                          <InputErrorIcon />
+                        </div>
                       )}
                     </div>
-                    <div>
+                    <div className="relative">
                       <div className="absolute select-none z-1">
-                        <ContactInput1 />
+                        <ContactInput1 error={!!errors.lastName} />
                       </div>
                       <input
                         name="lastName"
                         value={form.lastName}
                         onChange={handleChange}
                         placeholder="Last name"
-                        className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.lastName ? "border-[#FF0033]" : "border-[#ffffff14]"
-                          }`}
+                        className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.lastName ? "border-[#FF0033]" : "border-[#ffffff14]"}`}
                       />
-
                       {errors.lastName && (
-                        <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.lastName}</span>
+                        <div className="absolute right-4 top-1/2 translate-y-[-25%] z-3 pointer-events-none">
+                          <InputErrorIcon />
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <div className="absolute select-none z-1">
-                      <ContactInput2 />
+                      <ContactInput2 error={!!errors.email} />
                     </div>
                     <input
                       name="email"
@@ -199,15 +221,16 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
                       value={form.email}
                       onChange={handleChange}
                       placeholder="Email"
-                      className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.email ? "border-[#FF0033]" : "border-[#ffffff14]"
-                        }`}
+                      className={`w-full px-8 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.email ? "border-[#FF0033]" : "border-[#ffffff14]"}`}
                     />
                     {errors.email && (
-                      <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.email}</span>
+                      <div className="absolute right-4 top-1/2 translate-y-[-25%] z-3 pointer-events-none">
+                        <InputErrorIcon />
+                      </div>
                     )}
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <div className="absolute select-none z-1">
                       <ContactInput2 />
                     </div>
@@ -221,9 +244,9 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
                     />
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <div className="absolute select-none z-1">
-                      <ContactTextarea />
+                      <ContactTextarea error={!!errors.message} />
                     </div>
                     <textarea
                       name="message"
@@ -231,11 +254,12 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
                       onChange={handleChange}
                       placeholder="Message"
                       rows={4}
-                      className={`w-full resize-none px-4 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.message ? "border-[#FF0033]" : "border-[#ffffff14]"
-                        }`}
+                      className={`w-full resize-none px-4 py-3 text-sm relative z-2 text-white placeholder:text-white/40 outline-none transition-colors focus:border-[#FF0033] ${errors.message ? "border-[#FF0033]" : "border-[#ffffff14]"}`}
                     />
                     {errors.message && (
-                      <span className="mt-1 block text-[10px] text-[#FF0033]">{errors.message}</span>
+                      <div className="absolute right-4 top-4 z-3 pointer-events-none">
+                        <InputErrorIcon />
+                      </div>
                     )}
                   </div>
 

@@ -10,7 +10,7 @@ const AboutTag = ({ text }) => {
 
   return (
     <div
-      className="rounded-lg border border-[#ffffff0d] bg-[#ffffff05] text-[#ffffff80] text-[12px] hover:text-[#FF0033] duration-500 px-3 py-1.5 cursor-pointer relative overflow-hidden group"
+      className="rounded-lg border border-[#ffffff0d] bg-[#ffffff05] text-[#ffffff80] text-[12px] hover:text-[#FF0033] duration-800 px-3 py-1.5 cursor-pointer relative overflow-hidden group ease-out"
       onMouseEnter={playHover}
     >
       {text}

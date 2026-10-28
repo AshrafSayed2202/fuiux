@@ -13,7 +13,7 @@ const TextLogo = ({ active }) => {
   return (
     <div
       onClick={onLogoClick}
-      className={`text-4xl font-bold text-white flex items-center relative group cursor-pointer duration-200 ${active ? "hover:underline" : "hover:scale-[1.1]"
+      className={`text-4xl font-bold text-white flex items-center relative group cursor-pointer duration-200 z-60 ${active ? "hover:underline" : "hover:scale-[1.1]"
         }`}
     >
       <span

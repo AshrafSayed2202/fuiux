@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
+import { motion } from "framer-motion"
 import Header from "../ui/Header"
 import PricingCardNumb from "../assets/svgs/PricingCardNumb"
 import PricingCardNumb2 from "../assets/svgs/PricingCardNumb2"
@@ -11,6 +12,7 @@ import { useScrambleText } from "../hooks/useScrambleText"
 import hoverSound from "../assets/sounds/hover.wav"
 import clickSound from "../assets/sounds/click.wav"
 import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
+import pricingHoverSound from "../assets/sounds/pricing-hover.wav"
 
 const plans = [
   {
@@ -116,9 +118,27 @@ const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
     volume: 0.45,
   })
 
+  const pricingHoverRef = useRef(null)
+
+  useEffect(() => {
+    pricingHoverRef.current = new Audio(pricingHoverSound)
+    pricingHoverRef.current.volume = 0.3
+    pricingHoverRef.current.preload = "auto"
+  }, [])
+
+  const playPricingHover = () => {
+    const audio = pricingHoverRef.current
+    if (!audio) return
+    audio.currentTime = 0
+    audio.play().catch(() => {})
+  }
+
   return (
     <article
-      onMouseEnter={onEnter}
+      onMouseEnter={() => {
+        playPricingHover()
+        onEnter()
+      }}
       onMouseLeave={onLeave}
       className={`relative flex flex-col ${isMid ? "h-164.5" : "h-154.5"}`}
     >
@@ -157,7 +177,7 @@ const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
             <span className={`text-[11px] tracking-[0.18em] uppercase mb-3 duration-300 ${(isHovered || isMid) ? "text-[#FF0033]" : "text-white/36"}`}>
               {plan.title}
             </span>
-            <span className={`text-white/80 text-5xl font-extrabold leading-14 duration-300 ${isHovered ? "scale-125" : ""}`}>
+            <span className={`text-white/80 text-5xl font-extrabold leading-14 duration-300 ${isHovered ? "scale-125 text-white!" : ""}`}>
               ${price.toLocaleString()}
             </span>
             <span
@@ -221,16 +241,41 @@ const PricingSection = () => {
   return (
     <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!" id="pricing">
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
-        <Header header="Pricing" centered={true} />
-        <h1 className="text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-1.6px]">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <Header header="Pricing" centered={true} />
+        </motion.div>
+        <motion.h1
+          className="text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-1.6px]"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+        >
           Simple,
           <span className="neon-text"> transparent </span> pricing.
-        </h1>
-        <p className="text-white/40 text-base font-normal leading-6 text-center">
+        </motion.h1>
+        <motion.p
+          className="text-white/40 text-base font-normal leading-6 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+        >
           No hidden fees. No vague scope. Pick the plan that fits your project and <br /> let&apos;s build something remarkable.
-        </p>
+        </motion.p>
 
-        <div className="flex justify-center mt-2 ">
+        <motion.div
+          className="flex justify-center mt-2 "
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.25 }}
+        >
           <div className="flex items-center gap-1.25 rounded-lg p-1.25 border border-white/10">
             <button
               type="button"
@@ -261,18 +306,25 @@ const PricingSection = () => {
               Monthly
             </button>
           </div>
-        </div>
+        </motion.div>
 
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 items-end">
-          {plans.map((plan) => (
-            <PlanCard
+          {plans.map((plan, index) => (
+            <motion.div
               key={plan.id}
-              plan={plan}
-              billing={billing}
-              isHovered={hoveredId === plan.id}
-              onEnter={() => setHoveredId(plan.id)}
-              onLeave={() => setHoveredId(null)}
-            />
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 + index * 0.15 }}
+            >
+              <PlanCard
+                plan={plan}
+                billing={billing}
+                isHovered={hoveredId === plan.id}
+                onEnter={() => setHoveredId(plan.id)}
+                onLeave={() => setHoveredId(null)}
+              />
+            </motion.div>
           ))}
         </div>
       </div>

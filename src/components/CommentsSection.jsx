@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion } from "framer-motion"
 import Header from "../ui/Header"
 import CommentContainer from "../assets/svgs/CommentContainer"
 import commentor1 from "../assets/images/commentor1.png"
@@ -109,9 +110,22 @@ const CommentsSection = () => {
         }
       `}</style>
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
-        <Header header="Testimonials" />
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <Header header="Testimonials" />
+        </motion.div>
 
-        <div className="relative flex items-end justify-between gap-6 pb-6 border-b border-white/3">
+        <motion.div
+          className="relative flex items-end justify-between gap-6 pb-6 border-b border-white/3"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+        >
           <h1 className="text-[80px] font-extrabold text-white leading-[100%] tracking-[-1.6px]">
             What Clients
             <span className="neon-text"> Say ?</span>
@@ -138,8 +152,14 @@ const CommentsSection = () => {
               </svg>
             </button>
           </div>
-        </div>
-        <div className="relative h-93 my-30 -translate-y-12">
+        </motion.div>
+        <motion.div
+          className="relative h-93 mt-30 mb-10 -translate-y-12"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+        >
           <div className="absolute flex w-full h-full justify-center gap-6">
             <div className="relative h-93 w-72 shrink-0">
               <div className="absolute inset-0" />
@@ -162,7 +182,7 @@ const CommentsSection = () => {
               <CommentContainer />
             </div>
           </div>
-          <div className="flex items-center gap-1.5 mt-2 absolute bottom-[0%] left-[46.7%]">
+          <div className="flex items-center gap-1.5 mt-2 absolute bottom-[1%] left-[48.3%]">
             {Array.from({ length: 30 }).map((_, index) => {
               const filled = index < filledDots
               return (
@@ -177,8 +197,13 @@ const CommentsSection = () => {
               )
             })}
           </div>
-        </div>
-        <div className="mt-16">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 }}
+        >
           <div className="flex items-center gap-4">
             <span className=" shrink-0 text-[12px] text-[#ff6467] uppercase leading-4 tracking-[3.60px] flex items-center gap-3">
               Trusted by
@@ -199,7 +224,7 @@ const CommentsSection = () => {
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   )

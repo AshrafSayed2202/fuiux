@@ -15,7 +15,7 @@ const ToolCard = ({ icon, text, percentage, isBlanc = false, size, bigDot }) => 
 
   return (
     <div
-      className={`rounded-2xl border bg-white/5 hover:bg-transparent backdrop-blur-[10px] duration-300 border-[#ffffff0d] p-6 flex flex-col gap-5 items-center justify-center cursor-pointer relative overflow-hidden group aspect-square`}
+      className={`rounded-2xl border bg-[#0F0F0F] backdrop-blur-[10px] duration-300 border-[#ffffff0d] p-6 flex flex-col gap-5 items-center justify-center cursor-pointer relative overflow-hidden group aspect-square`}
       style={{ width: `${size}px`, height: `${size}px`, maxWidth: `${size}px`, maxHeight: `${size}px` }}
       onMouseEnter={playHover}
     >

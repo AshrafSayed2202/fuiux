@@ -1,27 +1,13 @@
-import { useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion } from "framer-motion"
 import AboutCard from "../ui/AboutCard"
 import AboutTag from "../ui/AboutTag"
 import Header from "../ui/Header"
 
 const AboutSection = () => {
-  const containerRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  })
-
-  const scale = useTransform(scrollYProgress, [0, 0.55, 0.85, 1], [1, 1, 0.9, 0.85])
-  const y = useTransform(scrollYProgress, [0, 0.55, 0.85, 1], [0, 0, -80, -180])
-  const opacity = useTransform(scrollYProgress, [0, 0.75, 1], [1, 1, 0.6])
-
   return (
-    <div ref={containerRef} className="h-[280vh] relative" id="about">
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0A0A0A] z-10">
-        <motion.div
-          className="relative w-full h-full flex items-center"
-          style={{ scale, y, opacity }}
-        >
+    <div className="relative" style={{ height: "calc(200vh + 300px)" }} id="about">
+      <div className="sticky top-0 h-screen z-10 bg-[#0A0A0A] overflow-hidden">
+        <motion.div className="relative w-full h-full flex items-center">
           <div className="w-175 h-100 bg-[#C100071A] rounded-full blur-[100px] absolute -top-15" />
           <div className="w-100 h-100 bg-[#82181A14] rounded-full blur-[120px] absolute bottom-0 right-0" />
           <div className="relative w-full flex container flex-col gap-7.5 py-46">

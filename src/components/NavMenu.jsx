@@ -5,6 +5,18 @@ import LinkHoverFooter from "../assets/svgs/LinkHoverFooter";
 import { useScrambleText } from "../hooks/useScrambleText";
 import hoverSound from "../assets/sounds/hover.wav";
 import clickSound from "../assets/sounds/click.wav";
+import RedRoadMap from "../assets/svgs/RedRoadMap";
+import Character from "../assets/images/charcter-2.png";
+import { motion } from "framer-motion";
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
 
 const NavMenuItem = ({ title, link, onClose }) => {
   const { start, stop, click } = useScrambleText(title, {
@@ -15,11 +27,14 @@ const NavMenuItem = ({ title, link, onClose }) => {
 
   const handleClick = () => {
     click();
-    onClose?.(); // immediately reset parent menu state
+    onClose?.();
   };
 
   return (
-    <div className="w-full flex items-center justify-center text-3xl px-6 py-4 text-center relative">
+    <motion.div
+      variants={itemVariants}
+      className="w-full flex items-center justify-center text-3xl px-6 py-4 text-center relative"
+    >
       <a
         href={link}
         onMouseEnter={start}
@@ -32,8 +47,18 @@ const NavMenuItem = ({ title, link, onClose }) => {
         </div>
         {title}
       </a>
-    </div>
+    </motion.div>
   );
+};
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.4,
+    },
+  },
 };
 
 const NavMenu = ({ onClose }) => {
@@ -49,13 +74,39 @@ const NavMenu = ({ onClose }) => {
 
   return (
     <div className="bg-[#0A0A0A] relative h-screen w-screen overflow-hidden">
-      <img src={footerBg1} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />
-      <img src={footerBg2} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />
-      <img src={footerBg3} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />
+      <motion.img
+        src={footerBg1}
+        alt=""
+        className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      />
+      <motion.img
+        src={footerBg2}
+        alt=""
+        className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
+      />
+      <motion.img
+        src={footerBg3}
+        alt=""
+        className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+      />
 
       <div className="relative w-full h-full gap-6.25 pt-20 pb-15">
-        <div className="h-full">
-          <div className="w-1/3 flex flex-col h-full gap-4 items-center justify-end pb-7">
+        <div className="h-full relative z-2">
+          <motion.div
+            className="w-1/3 flex flex-col h-full gap-4 items-center justify-end pb-7"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {navs.map((nav, index) => (
               <NavMenuItem
                 key={index}
@@ -64,8 +115,24 @@ const NavMenu = ({ onClose }) => {
                 onClose={onClose}
               />
             ))}
-          </div>
+          </motion.div>
         </div>
+        <motion.div
+          className="absolute top-0 user-select-none pointer-events-none z-1"
+          initial={{ opacity: 0, x: -80 ,rotateY:180 }}
+          animate={{ opacity: 1, x: 0 ,rotateY:180 }}
+          transition={{ duration: 0.9, delay: 1.1, ease: "easeOut" }}
+        >
+          <RedRoadMap />
+        </motion.div>
+        <motion.img
+          src={Character}
+          alt=""
+          className="absolute bottom-0 right-0 translate-x-1/5 h-full w-full object-cover pointer-events-none z-2"
+          initial={{ opacity: 1, x: 120 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.1, delay: 1.3, ease: "easeOut" }}
+        />
       </div>
     </div>
   );

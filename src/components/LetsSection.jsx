@@ -1,63 +1,112 @@
-import LetsButton from "../assets/svgs/LetsButton"
-import LetsLight from "../assets/svgs/LetsLight"
-import Header from "../ui/Header"
-import LetsChar1 from "../assets/images/letsChar1.png"
-import LetsChar2 from "../assets/images/letsChar2.png"
-import LetsBg1 from "../assets/images/LetsBg1.png"
-import LetsBg2 from "../assets/images/LetsBg2.png"
-import { useScrambleText } from "../hooks/useScrambleText"
-import { useState, useEffect } from "react"
-
-const texts = ["Web Design", "Mobile App", "Dashboard", "Games"]
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Header from "../ui/Header";
+import LetsChar1 from "../assets/images/letsChar1.png";
+import LetsChar2 from "../assets/images/letsChar2.png";
+import LetsBg1 from "../assets/images/LetsBg1.png";
+import LetsBg2 from "../assets/images/LetsBg2.png";
+import LetsBtn from "../assets/svgs/LetsBtn";
+import { useScrambleText } from "../hooks/useScrambleText";
+import hoverSound from "../assets/sounds/hover.wav";
+import clickSound from "../assets/sounds/click.wav";
+import ContactModal from "../components/ContactModal";
 
 const LetsSection = () => {
-  const [index, setIndex] = useState(0)
-  const current = texts[index]
-  const { text, start } = useScrambleText(current)
+  const [contactOpen, setContactOpen] = useState(false);
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % texts.length)
-    }, 5000)
-    return () => clearInterval(id)
-  }, [])
+  const { text, start, stop, click } = useScrambleText("Get in touch", {
+    hoverSound,
+    clickSound,
+    volume: 0.45,
+  });
 
-  useEffect(() => {
-    start()
-  }, [current, start])
+  const handleClick = () => {
+    click();
+    setContactOpen(true);
+  };
 
   return (
-    <div className="bg-[#0A0A0A] relative min-h-screen flex items-center justify-center overflow-hidden!" id="contact">
-      <img src={LetsBg1} alt="lets-bg-1" className="absolute top-1/2 left-1/2 object-cover translate-x-[-50%] translate-y-[-50%]" />
-      <img src={LetsBg2} alt="lets-bg-2" className="absolute top-1/2 left-1/2 object-cover translate-x-[-50%] translate-y-[-50%]" />
-      <img src={LetsChar1} alt="lets-char-1" className="absolute bottom-0 right-0 h-full object-cover object-center" />
-      <img src={LetsChar2} alt="lets-char-2" className="absolute bottom-0 left-0 h-full object-cover object-center" />
-      <div className="relative w-full flex container flex-col gap-14 pt-20 pb-30">
-        <Header header="Let's collaborate" centered={true} Line={false} />
-        <h1 className="text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-1.6px]">
-          Have a project in
-          <span className="neon-text"> mind? </span>
-        </h1>
-        <p className="text-white/40 text-base font-normal leading-6 text-center">
-          I'm open to freelance projects, full-time roles, and long-term <br /> partnerships. Let's make something great together.
-        </p>
-        <div className="flex justify-center items-center">
-          <div className="absolute flex items-center justify-center gap-2 leading-6 pr-20">
-            <span className="relative size-4">
-              <span className="absolute bg-[#ff0033] w-1 h-full block top-1/2 rounded-md left-1/2 translate-x-[-50%] translate-y-[-50%]"></span>
-              <span className="absolute bg-[#ff0033] w-full h-1 block top-1/2 rounded-md left-1/2 translate-x-[-50%] translate-y-[-50%]"></span>
-            </span>
-            <span className="text-sm text-white font-bold tracking-tight">Create</span>
-            <span className="bg-[#ff0033] w-1 h-11 block rounded-md"></span>
-            <span className="relative text-sm text-white font-bold tracking-tight h-11 w-1">
-              <p className="absolute top-1/2 translate-y-[-50%] left-0 text-nowrap z-2">{text}</p>
-              <span className="block absolute -left-11 top-1/2 translate-y-[-50%]"><LetsLight /></span>
-            </span>
+    <>
+      <div className="relative" style={{ height: "calc(200vh + 300px)" }} id="contact">
+        <div className="sticky top-0 h-screen z-10 bg-[#0A0A0A] overflow-hidden flex items-center justify-center">
+          <img
+            src={LetsBg1}
+            alt="lets-bg-1"
+            className="absolute top-1/2 left-1/2 object-cover translate-x-[-50%] translate-y-[-50%]"
+          />
+          <img
+            src={LetsBg2}
+            alt="lets-bg-2"
+            className="absolute top-1/2 left-1/2 object-cover translate-x-[-50%] translate-y-[-50%]"
+          />
+          <img
+            src={LetsChar1}
+            alt="lets-char-1"
+            className="absolute bottom-0 right-0 h-full object-cover object-center"
+          />
+          <img
+            src={LetsChar2}
+            alt="lets-char-2"
+            className="absolute bottom-0 left-0 h-full object-cover object-center"
+          />
+
+          <div className="relative w-full flex container flex-col gap-14 pt-20 pb-30">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <Header header="Let's collaborate" centered={true} Line={false} />
+            </motion.div>
+            <motion.h1
+              className="text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-1.6px]"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+            >
+              Have a project in
+              <span className="neon-text"> mind? </span>
+            </motion.h1>
+            <motion.p
+              className="text-white/40 text-base font-normal leading-6 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+            >
+              I'm open to freelance projects, full-time roles, and long-term{" "}
+              <br /> partnerships. Let's make something great together.
+            </motion.p>
+
+            <motion.div
+              className="h-14.5 w-62.25 relative group overflow-hidden cursor-pointer m-auto"
+              onMouseEnter={start}
+              onMouseLeave={stop}
+              onClick={handleClick}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+            >
+              <div className="text-white uppercase text-sm relative z-2 font-bold leading-5 tracking-tight flex items-center justify-center h-full w-full duration-600">
+                {text}
+              </div>
+              <div className="absolute top-0 left-0 h-full w-full z-1 duration-600">
+                <LetsBtn />
+              </div>
+            </motion.div>
           </div>
-          <LetsButton />
         </div>
       </div>
-    </div>
-  )
-}
-export default LetsSection
+
+      <ContactModal
+        isOpen={contactOpen}
+        onClose={() => setContactOpen(false)}
+      />
+    </>
+  );
+};
+
+export default LetsSection;
