@@ -51,10 +51,10 @@ const comments = [
   },
   {
     id: 6,
-    name: "Aziz Ben Naif",
-    title: "CEO, AZ IT",
+    name: "Yousef Khaleel",
+    title: "CTO, EXAB",
     image: commentor6,
-    text: "Working with Fawzi was an exceptional experience! His understanding of project details was outstanding, and the results exceeded our expectations. I highly recommend him to anyone looking for engaging and effective design solutions",
+    text: "As a CTO, I worked with Fawzi on several projects, and he stood out for his ability to turn ideas into tangible, innovative digital experiences. He combines visual craft with a deep understanding of users, creating designs that look compelling, make sense, and feel effortless to use.",
   },
 ]
 

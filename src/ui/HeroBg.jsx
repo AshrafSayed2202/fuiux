@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useTransform } from "framer-motion";
+import { useTransform } from "framer-motion";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
@@ -12,7 +12,68 @@ import helmetUrl from "../assets/images/helmet.glb?url";
 import topBg from "../assets/images/top-background.jpg";
 import bottomBg from "../assets/images/bottom-background.jpg";
 
-const SAMPLES = 56;
+// Number of stored trail points (one is added per frame). It was 40; raised
+// to 64 so the auto sweep can have a longer trail. The hover look is
+// rescaled below so it behaves exactly as before.
+const SAMPLES = 64;
+
+/* ------------------------------------------------------------------ */
+/*  Idle auto-sweep (Z shape)                                          */
+/* ------------------------------------------------------------------ */
+const IDLE_MS = 3000; // idle time before a sweep / between sweeps
+const SWEEP_MS = 1100; // how long one sweep takes (smaller = faster)
+
+// Z path in NDC: top-left -> top-right -> bottom-left -> bottom-right
+const Z_PTS = [
+  [-0.9, 0.8],
+  [0.9, 0.8],
+  [-0.9, -0.8],
+  [0.9, -0.8],
+];
+const Z_SPLIT = [0.28, 0.72]; // share of time per segment (diagonal is longest)
+
+function zPath(s) {
+  let i, t;
+  if (s < Z_SPLIT[0]) {
+    i = 0;
+    t = s / Z_SPLIT[0];
+  } else if (s < Z_SPLIT[1]) {
+    i = 1;
+    t = (s - Z_SPLIT[0]) / (Z_SPLIT[1] - Z_SPLIT[0]);
+  } else {
+    i = 2;
+    t = (s - Z_SPLIT[1]) / (1 - Z_SPLIT[1]);
+  }
+  const a = Z_PTS[i];
+  const b = Z_PTS[i + 1];
+  return { x: a[0] + (b[0] - a[0]) * t, y: a[1] + (b[1] - a[1]) * t };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Blob look: HOVER (real mouse) vs AUTO (idle sweep)                 */
+/*                                                                     */
+/*  HOVER is exactly what you had before. AUTO is blended in only      */
+/*  while the idle sweep is running.                                   */
+/*                                                                     */
+/*  radius : size of the blob head                                     */
+/*  trail  : trail length in FRAMES (max SAMPLES - 1)                  */
+/*  taper  : < 1 = fat body, > 1 = thin pointy tail                    */
+/*  follow : how tightly the blob chases the pointer (0..1)            */
+/* ------------------------------------------------------------------ */
+const HOVER_LOOK = {
+  radius: 0.30,
+  trail: 35.1, // = old uLength 0.9 * 39 samples
+  taper: 0.72,
+  follow: 0.18,
+};
+const AUTO_LOOK = {
+  radius: 0.45, // bigger blob
+  trail: 46, // longer trail
+  taper: 0.55, // fatter body so the long trail reads as thick
+  follow: 0.28, // keeps up with the faster movement
+};
+
+const mixv = (a, b, m) => a + (b - a) * m;
 
 /* ------------------------------------------------------------------ */
 /*  Head (person) shaders                                              */
@@ -47,6 +108,50 @@ const headFragment = `
     float lambert = max(dot(normal, lightDir), 0.0) - 0.72;
     vec3 lit = color.rgb * (1.0 + lambert * uRelight);
     gl_FragColor = vec4(clamp(lit, 0.0, 1.0), alpha * uReveal);
+  }
+`;
+
+/* ------------------------------------------------------------------ */
+/*  Ghost "scanned" helmet shaders                                     */
+/*  A flat white copy of the helmet at ~0.1 opacity, with a bright     */
+/*  band travelling bottom -> top like a scanner.                      */
+/* ------------------------------------------------------------------ */
+const ghostVertex = `
+  uniform mat4 uInv;
+  varying vec3 vLocal;
+  varying vec3 vN;
+  varying vec3 vView;
+  void main() {
+    vec4 world = modelMatrix * vec4(position, 1.0);
+    vLocal = (uInv * world).xyz;
+    vN = normalize(normalMatrix * normal);
+    vec4 mv = viewMatrix * world;
+    vView = -mv.xyz;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const ghostFragment = `
+  uniform float uMinY;
+  uniform float uMaxY;
+  uniform float uTime;
+  uniform float uBase;
+  varying vec3 vLocal;
+  varying vec3 vN;
+  varying vec3 vView;
+  void main() {
+    float t = clamp((vLocal.y - uMinY) / max(uMaxY - uMinY, 1e-4), 0.0, 1.0);
+
+    // scan band travelling bottom -> top, then a pause before repeating
+    float pos = fract(uTime * 0.22) * 1.4 - 0.2;
+    float band = smoothstep(0.07, 0.0, abs(t - pos));
+
+    // faint scanlines + soft rim so the silhouette reads as a hologram
+    float lines = 0.5 + 0.5 * sin(t * 220.0 - uTime * 2.0);
+    float rim = pow(1.0 - abs(dot(normalize(vN), normalize(vView))), 2.0);
+
+    float a = uBase + band * 0.45 + lines * 0.02 + rim * 0.05;
+    gl_FragColor = vec4(1.0, 1.0, 1.0, a);
   }
 `;
 
@@ -162,7 +267,18 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     return () => unsubscribe();
   }, [mouseEnabled]);
 
-  const characterScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.5]);
+  // Scroll-driven character scale. Kept in a ref so the render loop can read
+  // it every frame without re-running the Three.js setup effect.
+  const characterScale = useTransform(scrollYProgress, [0, 0.3], [0.85, 1.5]);
+  const scaleRef = useRef(1);
+
+  useEffect(() => {
+    scaleRef.current = characterScale.get();
+    const unsub = characterScale.on("change", (v) => {
+      scaleRef.current = v;
+    });
+    return () => unsub();
+  }, [characterScale]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -187,6 +303,12 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     const key = new THREE.DirectionalLight(0xffffff, 1.3);
     key.position.set(2.2, 3.2, 4);
     scene.add(key);
+
+    // Everything that belongs to the character (head plane + helmet) lives in
+    // this group. Scaling it zooms ONLY the character; the backgrounds and the
+    // screen-space blob mask stay untouched.
+    const characterGroup = new THREE.Group();
+    scene.add(characterGroup);
 
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin("anonymous");
@@ -216,21 +338,53 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     let ready = false;
     let startTime = null;
 
+    // Idle auto-sweep state. A real mouse move cancels it and restarts the
+    // idle timer. Sweeps alternate: forward (TL -> BR), then reverse (BR -> TL).
+    //   mix     : 0 = hover look, 1 = auto-sweep look (eased every frame)
+    //   release : how fast mix falls back to 0 (fast when the mouse takes over)
+    const auto = {
+      active: false,
+      start: 0,
+      reverse: false,
+      nextAt: performance.now() + IDLE_MS,
+      mix: 0,
+      release: 0.06,
+    };
+
     /* ---------------- blob tuning ---------------- */
+    // radius / length / taper start at the HOVER look and are blended toward
+    // the AUTO look inside animate() while a sweep is running.
     const revealUniforms = {
       uTrail: { value: trail },
       uPace: { value: 0 },
       uAspect: { value: 1 },
-      uRadius: { value: 0.30 }, // size of the blob head
-      uLength: { value: 0.70 }, // how long the tail is (0..1)
-      uTaper: { value: 0.72 }, // < 1 = fat body, > 1 = thin pointy tail
+      uRadius: { value: HOVER_LOOK.radius }, // size of the blob head
+      uLength: { value: HOVER_LOOK.trail / (SAMPLES - 1) }, // tail length (0..1)
+      uTaper: { value: HOVER_LOOK.taper }, // < 1 = fat body, > 1 = thin pointy tail
       uNoiseAmp: { value: 1.0 }, // how lumpy / irregular the edge is
-      uNoiseScale: { value: 2.7 }, // size of the lumps (higher = smaller lumps)
-      uEdge: { value: 0.03 }, // edge softness (smaller = crisper)
+      uNoiseScale: { value: 4 }, // size of the lumps (higher = smaller lumps)
+      uEdge: { value: 0 }, // edge softness (smaller = crisper)
       uTime: { value: 0 },
     };
 
-    let headMesh, helmetGroup, headMaterial;
+    let headMesh, helmetGroup, headMaterial, ghostMat;
+    let topBgMesh, bottomBgMesh;
+
+    // Stretch a background plane so it exactly fills the visible screen at its
+    // depth. The full image is always shown, whatever the window size.
+    function fitBackground(mesh) {
+      if (!mesh) return;
+      const dist = camera.position.z - mesh.position.z;
+      const h = 2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      const w = h * camera.aspect;
+      mesh.scale.set(w, h, 1);
+      mesh.position.x = camera.position.x;
+      mesh.position.y = camera.position.y;
+    }
+    function fitBackgrounds() {
+      fitBackground(topBgMesh);
+      fitBackground(bottomBgMesh);
+    }
 
     async function init() {
       try {
@@ -245,17 +399,17 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
           loadTex(bottomBg, true), // MeshBasicMaterial handles sRGB itself
         ]);
 
-        // BOTTOM background: only seen through the blob
+        // BOTTOM background: only seen through the blob (NOT scaled)
         const bottomMat = new THREE.MeshBasicMaterial({
           map: bottomTex,
           transparent: false,
           toneMapped: false, // same raw colors as the top image
         });
-        const bottomMesh = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), bottomMat);
-        bottomMesh.position.z = -2.4;
-        scene.add(bottomMesh);
+        bottomBgMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), bottomMat);
+        bottomBgMesh.position.z = -2.4;
+        scene.add(bottomBgMesh);
 
-        // TOP background: visible by default, the blob cuts it away
+        // TOP background: visible by default, the blob cuts it away (NOT scaled)
         const topMat = new THREE.ShaderMaterial({
           vertexShader: bgVertex,
           fragmentShader: bgFragment,
@@ -275,9 +429,11 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
           transparent: true,
           depthWrite: false,
         });
-        const topBgMesh = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), topMat);
+        topBgMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), topMat);
         topBgMesh.position.z = -1.5;
         scene.add(topBgMesh);
+
+        fitBackgrounds();
 
         // Use the REAL aspect ratio of the person image
         const imgW = diffuse.image.naturalWidth || diffuse.image.width || 1920;
@@ -309,7 +465,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
         const headGeo = new THREE.PlaneGeometry(targetWidth, planeHeight);
         headMesh = new THREE.Mesh(headGeo, headMaterial);
         headMesh.position.set(0, -0.1 - (targetHeight * EXTEND) / 2, 0);
-        scene.add(headMesh);
+        characterGroup.add(headMesh); // scaled with the character
 
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/libs/draco/gltf/");
@@ -326,6 +482,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
           mat.side = THREE.FrontSide;
           mat.transparent = true;
           mat.depthWrite = false;
+          obj.renderOrder = 2; // real helmet draws AFTER (on top of) the ghost
           mat.onBeforeCompile = (shader) => {
             Object.assign(shader.uniforms, revealUniforms);
             shader.vertexShader = shader.vertexShader
@@ -352,7 +509,39 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
 
         helmetGroup = new THREE.Group();
         helmetGroup.add(root);
-        scene.add(helmetGroup);
+
+        // ---- ghost copy of the helmet (white, ~0.1 opacity, scan band) ----
+        helmetGroup.updateMatrixWorld(true);
+        const ghostBox = new THREE.Box3().setFromObject(root);
+        // helmet-local bounds (helmetGroup is not attached yet, so this is
+        // simply the inverse of its own matrix)
+        ghostBox.applyMatrix4(helmetGroup.matrixWorld.clone().invert());
+
+        ghostMat = new THREE.ShaderMaterial({
+          vertexShader: ghostVertex,
+          fragmentShader: ghostFragment,
+          uniforms: {
+            uInv: { value: new THREE.Matrix4() },
+            uMinY: { value: ghostBox.min.y },
+            uMaxY: { value: ghostBox.max.y },
+            uTime: { value: 0 },
+            uBase: { value: 0 }, // ghost opacity
+          },
+          transparent: true,
+          depthWrite: false,
+          side: THREE.FrontSide,
+        });
+
+        const ghost = root.clone(true);
+        ghost.traverse((o) => {
+          if (o.isMesh) {
+            o.material = ghostMat;
+            o.renderOrder = 1; // ghost sits underneath the real helmet
+          }
+        });
+        helmetGroup.add(ghost);
+
+        characterGroup.add(helmetGroup); // scaled with the character
 
         ready = true;
       } catch (err) {
@@ -368,10 +557,15 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
       camera.updateProjectionMatrix();
       aspect = camera.aspect;
       revealUniforms.uAspect.value = aspect;
+      fitBackgrounds();
     }
 
     function onPointer(e) {
       if (!isMouseActive) return;
+      // a real mouse move cancels any running sweep and restarts the idle timer
+      auto.active = false;
+      auto.release = 0.25; // hand the look back to hover quickly
+      auto.nextAt = performance.now() + IDLE_MS;
       const rect = canvas.getBoundingClientRect();
       pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
@@ -382,9 +576,45 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
       if (!startTime) startTime = time;
       const t = (time - startTime) / 1000;
 
+      // Scroll-driven zoom: only the character group is scaled.
+      // (Set before the ready block so the ghost's matrices are current.)
+      characterGroup.scale.setScalar(scaleRef.current);
+
       if (ready) {
-        smoothed.x += (pointer.x - smoothed.x) * 0.18;
-        smoothed.y += (pointer.y - smoothed.y) * 0.18;
+        // ---- idle Z-sweep: drives the same pointer the mouse drives ----
+        if (isMouseActive) {
+          if (!auto.active && time >= auto.nextAt) {
+            auto.active = true;
+            auto.start = time;
+            auto.release = 0.06; // gentle fade back to hover when it ends
+          }
+          if (auto.active) {
+            const u = Math.min((time - auto.start) / SWEEP_MS, 1);
+            const p = zPath(auto.reverse ? 1 - u : u); // reverse = BR -> TL
+            pointer.x = p.x;
+            pointer.y = p.y;
+            if (u >= 1) {
+              auto.active = false;
+              auto.reverse = !auto.reverse; // next sweep runs backwards
+              auto.nextAt = time + IDLE_MS;
+            }
+          }
+        }
+
+        // ---- blend between the hover look (0) and the auto look (1) ----
+        const goal = auto.active ? 1 : 0;
+        auto.mix += (goal - auto.mix) * (goal > auto.mix ? 0.12 : auto.release);
+        if (auto.mix < 0.001) auto.mix = 0; // snaps to EXACTLY the hover look
+        const m = auto.mix;
+
+        revealUniforms.uRadius.value = mixv(HOVER_LOOK.radius, AUTO_LOOK.radius, m);
+        revealUniforms.uLength.value =
+          mixv(HOVER_LOOK.trail, AUTO_LOOK.trail, m) / (SAMPLES - 1);
+        revealUniforms.uTaper.value = mixv(HOVER_LOOK.taper, AUTO_LOOK.taper, m);
+        const follow = mixv(HOVER_LOOK.follow, AUTO_LOOK.follow, m);
+
+        smoothed.x += (pointer.x - smoothed.x) * follow;
+        smoothed.y += (pointer.y - smoothed.y) * follow;
 
         const step = Math.hypot(smoothed.x - trail[0].x, smoothed.y - trail[0].y);
         const target = Math.min(1, step / 0.035);
@@ -407,6 +637,13 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
           helmetGroup.rotation.y = smoothed.x * 0.045;
           helmetGroup.position.x = smoothed.x * 0.012;
           helmetGroup.position.y = 0.42 - smoothed.y * 0.01;
+        }
+
+        // keep the ghost's scan anchored to the helmet's own space
+        if (ghostMat && helmetGroup) {
+          characterGroup.updateMatrixWorld(true);
+          ghostMat.uniforms.uInv.value.copy(helmetGroup.matrixWorld).invert();
+          ghostMat.uniforms.uTime.value = t;
         }
       }
 
@@ -432,13 +669,8 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     <div
       ref={containerRef}
       className="relative h-full w-full overflow-hidden"
-      style={{ transformStyle: "preserve-3d" }}
     >
-      <motion.canvas
-        ref={canvasRef}
-        className="absolute inset-0 h-full w-full"
-        style={{ scale: characterScale }}
-      />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full" />
     </div>
   );
 }
