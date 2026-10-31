@@ -53,13 +53,16 @@ const FilterButton = ({ text, isActive, onClick }) => {
 
 const CardImage = ({ image, title }) => {
   return (
-    <div className="relative overflow-hidden border border-[#ffffff0d] rounded-2xl">
+    <div className="relative overflow-hidden border border-[#ffffff0d] rounded-2xl group">
       <div className="w-full h-full bg-linear-360 from-black via-black/60 to-black/5 absolute z-5 duration-300" />
       <img
         src={image}
         alt={title}
         className="aspect-4/3 group-hover:scale-105 duration-300"
       />
+      <div className="z-6 w-full h-full absolute top-0 left-0">
+        <CardBorders />
+      </div>
     </div>
   )
 }
@@ -80,8 +83,9 @@ const ProjectCard = ({ project }) => {
       onMouseEnter={() => { playHover(); setArrowHover(true) }}
       onMouseLeave={() => { setArrowHover(false) }}
     >
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden group">
         <CardImage image={project.image} title={project.title} />
+
       </div>
       <div className="flex flex-col gap-3 p-5">
         <div className="flex gap-2 items-center">
