@@ -25,7 +25,7 @@ const SAMPLES = 64;
 /*  BOTTOM_BLEED = how far the image bottom sits below the screen edge */
 /*  (hides any seam / gap). Raise it if you ever see a thin gap.       */
 /* ------------------------------------------------------------------ */
-const BOTTOM_BLEED = 0.05;
+const BOTTOM_BLEED = 0.0;
 
 /* ------------------------------------------------------------------ */
 /*  Idle auto-sweep (Z shape)                                          */
@@ -84,6 +84,9 @@ const AUTO_LOOK = {
 };
 
 const mixv = (a, b, m) => a + (b - a) * m;
+
+// Hovering the small mask wipes the real helmet in from top to bottom.
+const WIPE_MS = 900; // how long the wipe takes (and the way back up)
 
 /* ------------------------------------------------------------------ */
 /*  Head (person) shaders                                              */
@@ -268,7 +271,7 @@ const bgFragment = `
   }
 `;
 
-export default function HeroBg({ mouseEnabled, scrollYProgress }) {
+export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const [isMouseActive, setIsMouseActive] = useState(true);
@@ -293,6 +296,20 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     });
     return () => unsub();
   }, [characterScale]);
+
+  // Hovering the small mask in the side panel wipes the real helmet in from
+  // top to bottom. Kept in a ref (like the scale) so the Three.js setup
+  // effect doesn't re-run.
+  const maskHoverRef = useRef(0);
+
+  useEffect(() => {
+    if (!maskHover) return;
+    maskHoverRef.current = maskHover.get();
+    const unsub = maskHover.on("change", (v) => {
+      maskHoverRef.current = v;
+    });
+    return () => unsub();
+  }, [maskHover]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -348,6 +365,8 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     const pointer = { x: 0, y: 0 };
     const smoothed = { x: 0, y: 0 };
     let pace = 0;
+    let wipe = 0; // 0 = helmet only inside the blob, 1 = wipe finished (helmet fully visible)
+    let lastFrame = 0;
     let aspect = 1;
     let ready = false;
     let startTime = null;
@@ -379,6 +398,16 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
       uNoiseScale: { value: 4 }, // size of the lumps (higher = smaller lumps)
       uEdge: { value: 0 }, // edge softness (smaller = crisper)
       uTime: { value: 0 },
+      uForce: { value: 0 }, // wipe progress 0..1, top -> bottom (small-mask hover)
+    };
+
+    // Helmet-space info shared by the ghost and the real helmet shaders:
+    //   uInv          = inverse of the helmet group's world matrix (world -> helmet space)
+    //   uMinY / uMaxY = the helmet's vertical extent in helmet space
+    const helmetSpace = {
+      uInv: { value: new THREE.Matrix4() },
+      uMinY: { value: 0 },
+      uMaxY: { value: 1 },
     };
 
     let headMesh, helmetGroup, headMaterial, ghostMat;
@@ -516,15 +545,21 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
           obj.renderOrder = 2; // real helmet draws AFTER (on top of) the ghost
           mat.onBeforeCompile = (shader) => {
             Object.assign(shader.uniforms, revealUniforms);
+            Object.assign(shader.uniforms, helmetSpace);
             shader.vertexShader = shader.vertexShader
-              .replace("#include <common>", "#include <common>\nvarying vec4 vRevealClip;")
-              .replace("#include <project_vertex>", "#include <project_vertex>\nvRevealClip = gl_Position;");
+              .replace("#include <common>", "#include <common>\nvarying vec4 vRevealClip;\nvarying vec3 vHelmetLocal;\nuniform mat4 uInv;")
+              .replace("#include <project_vertex>", "#include <project_vertex>\nvRevealClip = gl_Position;\nvHelmetLocal = (uInv * modelMatrix * vec4(transformed, 1.0)).xyz;");
             shader.fragmentShader = shader.fragmentShader
-              .replace("#include <common>", `#include <common>\nvarying vec4 vRevealClip;\n${trailChunk}`)
+              .replace("#include <common>", `#include <common>\nvarying vec4 vRevealClip;\nvarying vec3 vHelmetLocal;\nuniform float uForce;\nuniform float uMinY;\nuniform float uMaxY;\n${trailChunk}`)
               .replace("#include <alphamap_fragment>", `
                 #include <alphamap_fragment>
                 vec2 revealNdc = vRevealClip.xy / vRevealClip.w;
-                diffuseColor.a *= revealMask(revealNdc);
+                // top -> bottom wipe in helmet space (uForce = progress 0..1)
+                float wipeFeather = 0.06; // edge softness (smaller = crisper)
+                float wipeT = clamp((vHelmetLocal.y - uMinY) / max(uMaxY - uMinY, 1e-4), 0.0, 1.0);
+                float wipeLine = (1.0 + wipeFeather) * (1.0 - uForce);
+                float wipeMask = smoothstep(wipeLine - wipeFeather, wipeLine, wipeT);
+                diffuseColor.a *= max(revealMask(revealNdc), wipeMask);
               `);
           };
         });
@@ -548,13 +583,18 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
         // simply the inverse of its own matrix)
         ghostBox.applyMatrix4(helmetGroup.matrixWorld.clone().invert());
 
+        // helmet's vertical extent in helmet space (used by the ghost scan
+        // AND by the real helmet's top -> bottom wipe)
+        helmetSpace.uMinY.value = ghostBox.min.y;
+        helmetSpace.uMaxY.value = ghostBox.max.y;
+
         ghostMat = new THREE.ShaderMaterial({
           vertexShader: ghostVertex,
           fragmentShader: ghostFragment,
           uniforms: {
-            uInv: { value: new THREE.Matrix4() },
-            uMinY: { value: ghostBox.min.y },
-            uMaxY: { value: ghostBox.max.y },
+            uInv: helmetSpace.uInv, // shared with the real helmet's wipe
+            uMinY: helmetSpace.uMinY,
+            uMaxY: helmetSpace.uMaxY,
             uTime: { value: 0 },
             uBase: { value: 0 }, // resting ghost opacity
             uBandStrength: { value: 0.1 }, // opacity of the scanning light (0..1)
@@ -666,6 +706,16 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
         revealUniforms.uPace.value = pace;
         revealUniforms.uTime.value = t;
 
+        // ---- small mask hovered: wipe the real helmet in from top to bottom ----
+        // (only while the mouse effect is enabled, so it can't get stuck on
+        // after scrolling away). When the hover ends the wipe runs back up.
+        const dt = lastFrame ? Math.min((time - lastFrame) / 1000, 0.05) : 0;
+        lastFrame = time;
+        const wipeDir = isMouseActive && maskHoverRef.current > 0.5 ? 1 : -1;
+        wipe = Math.min(1, Math.max(0, wipe + (wipeDir * dt) / (WIPE_MS / 1000)));
+        // ease in/out so the overlay accelerates and settles
+        revealUniforms.uForce.value = wipe * wipe * (3 - 2 * wipe);
+
         if (headMaterial) {
           headMaterial.uniforms.uParallax.value.set(smoothed.x, smoothed.y);
         }
@@ -679,7 +729,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
         // keep the ghost's scan anchored to the helmet's own space
         if (ghostMat && helmetGroup) {
           characterGroup.updateMatrixWorld(true);
-          ghostMat.uniforms.uInv.value.copy(helmetGroup.matrixWorld).invert();
+          helmetSpace.uInv.value.copy(helmetGroup.matrixWorld).invert();
           ghostMat.uniforms.uTime.value = t;
         }
       }

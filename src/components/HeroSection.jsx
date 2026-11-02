@@ -1,6 +1,19 @@
-import { useScroll, useTransform, motion } from "framer-motion"
+import { useScroll, useTransform, useMotionValue, motion } from "framer-motion"
 import HeroBg from "../ui/HeroBg"
+import NeonHover from "../ui/NeonHover"
 import HeroLogo from "../assets/svgs/HeroLogo"
+import WhatsAppContainer from "../assets/svgs/WhatsAppContainer"
+import WhatsAppIcon from "../assets/svgs/WhatsAppIcon"
+import SmallMask from "../assets/svgs/SmallMask"
+
+// WhatsApp number: country code + number, digits only (no "+", spaces or leading 0).
+// Example for Egypt: "201001234567"  <-- REPLACE THE PLACEHOLDER BELOW
+const WHATSAPP_NUMBER = "20XXXXXXXXXX"
+// Optional pre-filled message. Use "" for none.
+const WHATSAPP_MESSAGE = "Hi! I'd like to talk about a project."
+const whatsappUrl =
+    `https://wa.me/${WHATSAPP_NUMBER}` +
+    (WHATSAPP_MESSAGE ? `?text=${encodeURIComponent(WHATSAPP_MESSAGE)}` : "")
 
 const HeroSection = () => {
     const { scrollYProgress } = useScroll({
@@ -9,6 +22,14 @@ const HeroSection = () => {
 
     const scale = useTransform(scrollYProgress, [0, 0.2, 1], [1.1, 0.35, 0.38])
     const textOpacity = useTransform(scrollYProgress, [0, 0.2, 1], [1, 0, 0])
+
+    // The left panel fades out on scroll; once it is invisible it must stop
+    // reacting to the mouse (no pointer cursor / neon over empty space).
+    const panelPointerEvents = useTransform(textOpacity, (v) => (v > 0.05 ? "auto" : "none"))
+
+    // 1 while the small mask in the side panel is hovered. HeroBg reads it to
+    // wipe the real helmet in from top to bottom.
+    const maskHover = useMotionValue(0)
 
     const logoOpacity = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.38], [0, 0, 1, 1])
     const logoScale = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.40], [2.5, 2.5, 1.15, 0.8])
@@ -19,6 +40,31 @@ const HeroSection = () => {
     return (
         <div className="h-[700vh]" id="home">
             <div className="w-full sticky top-0 z-10 flex items-center justify-center overflow-hidden bg-zinc-950">
+                <motion.div
+                    className="absolute z-50 bottom-[2%] left-[12%] w-30 h-65 tracking-[4.8px] text-[12px] select-none uppercase text-[#ffffff26]"
+                    style={{ opacity: textOpacity, pointerEvents: panelPointerEvents }}
+                >
+                    <span className="text-[12px] tracking-[0%] text-[#FF6467E5] flex justify-between">
+                        AVAILABLE
+                        <span className="w-2 h-2 bg-[#FB2C36] rounded-full block mt-2 mr-2">
+                        </span>
+                    </span>
+                    <div className="flex flex-col justify-evenly items-center h-full">
+                        <NeonHover href={whatsappUrl} label="Chat with me on WhatsApp">
+                            <WhatsAppIcon/>
+                        </NeonHover>
+                        <div className="w-2/3 h-px bg-[#99001F]"/>
+                        <NeonHover
+                            onMouseEnter={() => maskHover.set(1)}
+                            onMouseLeave={() => maskHover.set(0)}
+                        >
+                            <SmallMask/>
+                        </NeonHover>
+                    </div>
+                    <div className="absolute bottom-0">
+                        <WhatsAppContainer />
+                    </div>
+                </motion.div>
                 <motion.div
                     className="absolute z-50 top-1/2 -translate-y-1/2 left-0 text-center rotate-270 tracking-[4.8px] text-[12px] select-none uppercase text-[#ffffff26] pointer-events-none"
                     style={{ opacity: textOpacity }}
@@ -84,7 +130,7 @@ const HeroSection = () => {
                         <div className="absolute inset-0 bg-[#E7000B] mix-blend-multiply" />
                     </motion.div>
 
-                    <HeroBg mouseEnabled={mouseEnabled} scrollYProgress={scrollYProgress} />
+                    <HeroBg mouseEnabled={mouseEnabled} scrollYProgress={scrollYProgress} maskHover={maskHover} />
                 </motion.div>
             </div>
         </div>

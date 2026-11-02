@@ -1,0 +1,89 @@
+/* ------------------------------------------------------------------ */
+/*  Neon "drawn on hover" effect for line-art SVGs                     */
+/*  Used by <NeonHover> (see NeonHover.jsx).                           */
+/*                                                                     */
+/*  Matches the neon text style:                                       */
+/*    fill   rgba(70, 8, 9, 0.40)                                      */
+/*    stroke #F03                                                      */
+/*    glow   0 0 20px rgba(255, 0, 51, 0.25)                           */
+/* ------------------------------------------------------------------ */
+.neon-hover {
+  /* tweak these */
+  --neon: #f03;
+  --neon-fill: rgba(70, 8, 9, 0.4);
+  --neon-glow-near: rgba(255, 0, 51, 0.55); /* tight glow hugging the lines */
+  --neon-glow-far: rgba(255, 0, 51, 0.25); /* soft 20px halo (same as the text) */
+  --neon-draw-time: 1.1s; /* how long the "drawing" takes */
+
+  display: block;
+  line-height: 0; /* no stray gap under the inline svg */
+  cursor: pointer;
+
+  /* Sit above anything positioned over it (e.g. an absolutely positioned
+     frame drawn later in the same panel), otherwise that element swallows
+     the mouse and the hover never reaches this wrapper. */
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.neon-hover svg {
+  display: block;
+  overflow: visible; /* don't clip the neon stroke at the svg edges */
+  transition: filter 0.35s ease;
+}
+
+/* glow */
+.neon-hover:hover svg {
+  filter: drop-shadow(0 0 3px var(--neon-glow-near))
+    drop-shadow(0 0 20px var(--neon-glow-far));
+}
+
+/* some icons clip their content to the viewBox, which would cut the stroke */
+.neon-hover:hover svg g {
+  clip-path: none;
+}
+
+/* ---- every line / shape: neon stroke that draws itself ---- */
+/* (mask / defs paths have neither a stroke nor a fill attribute, so they are untouched) */
+.neon-hover:hover svg path[stroke],
+.neon-hover:hover svg path[fill] {
+  stroke: var(--neon);
+  stroke-dasharray: var(--len, 1000) var(--len, 1000);
+  animation: neon-draw var(--neon-draw-time) cubic-bezier(0.45, 0.05, 0.25, 1) both;
+}
+
+/* ---- filled shapes (WhatsApp icon, dots): dark translucent fill fades in after the outline ---- */
+.neon-hover:hover svg path[fill] {
+  fill: var(--neon-fill);
+  fill-opacity: 1;
+  animation:
+    neon-draw var(--neon-draw-time) cubic-bezier(0.45, 0.05, 0.25, 1) both,
+    neon-fill 0.5s ease-out calc(var(--neon-draw-time) * 0.7) both;
+}
+
+@keyframes neon-draw {
+  from {
+    stroke-dashoffset: var(--len, 1000);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes neon-fill {
+  from {
+    fill: rgba(70, 8, 9, 0);
+  }
+  to {
+    fill: var(--neon-fill);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-hover:hover svg path[stroke],
+  .neon-hover:hover svg path[fill] {
+    animation: none;
+    stroke-dasharray: none;
+  }
+}
