@@ -8,7 +8,7 @@ import SmallMask from "../assets/svgs/SmallMask"
 
 // WhatsApp number: country code + number, digits only (no "+", spaces or leading 0).
 // Example for Egypt: "201001234567"  <-- REPLACE THE PLACEHOLDER BELOW
-const WHATSAPP_NUMBER = "20XXXXXXXXXX"
+const WHATSAPP_NUMBER = "201143637341"
 // Optional pre-filled message. Use "" for none.
 const WHATSAPP_MESSAGE = "Hi! I'd like to talk about a project."
 const whatsappUrl =
