@@ -18,6 +18,16 @@ import bottomBg from "../assets/images/bottom-background.jpg";
 const SAMPLES = 64;
 
 /* ------------------------------------------------------------------ */
+/*  Character placement                                                */
+/*                                                                     */
+/*  The character is scaled from its BOTTOM edge, so it always starts  */
+/*  at the bottom of the screen and grows upward.                      */
+/*  BOTTOM_BLEED = how far the image bottom sits below the screen edge */
+/*  (hides any seam / gap). Raise it if you ever see a thin gap.       */
+/* ------------------------------------------------------------------ */
+const BOTTOM_BLEED = 0.05;
+
+/* ------------------------------------------------------------------ */
 /*  Idle auto-sweep (Z shape)                                          */
 /* ------------------------------------------------------------------ */
 const IDLE_MS = 3000; // idle time before a sweep / between sweeps
@@ -114,7 +124,7 @@ const headFragment = `
 /* ------------------------------------------------------------------ */
 /*  Ghost "scanned" helmet shaders                                     */
 /*  A flat white copy of the helmet at ~0.1 opacity, with a bright     */
-/*  band travelling bottom -> top like a scanner.                      */
+/*  band travelling top -> bottom like a scanner.                      */
 /* ------------------------------------------------------------------ */
 const ghostVertex = `
   uniform mat4 uInv;
@@ -136,21 +146,24 @@ const ghostFragment = `
   uniform float uMaxY;
   uniform float uTime;
   uniform float uBase;
+  uniform float uBandStrength;
+  uniform float uBandWidth;
   varying vec3 vLocal;
   varying vec3 vN;
   varying vec3 vView;
   void main() {
     float t = clamp((vLocal.y - uMinY) / max(uMaxY - uMinY, 1e-4), 0.0, 1.0);
 
-    // scan band travelling bottom -> top, then a pause before repeating
-    float pos = fract(uTime * 0.22) * 1.4 - 0.2;
-    float band = smoothstep(0.07, 0.0, abs(t - pos));
+    // scan band travelling top -> bottom, then a pause before repeating
+    // (t = 1 is the top of the helmet, t = 0 the bottom)
+    float pos = 1.08 - fract(uTime * 0.5) * 1.16;
+    float band = smoothstep(uBandWidth, 0.0, abs(t - pos));
 
     // faint scanlines + soft rim so the silhouette reads as a hologram
     float lines = 0.5 + 0.5 * sin(t * 220.0 - uTime * 2.0);
     float rim = pow(1.0 - abs(dot(normalize(vN), normalize(vView))), 2.0);
 
-    float a = uBase + band * 0.45 + lines * 0.02 + rim * 0.05;
+    float a = uBase + band * uBandStrength + lines * 0.02;
     gl_FragColor = vec4(1.0, 1.0, 1.0, a);
   }
 `;
@@ -269,7 +282,8 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
 
   // Scroll-driven character scale. Kept in a ref so the render loop can read
   // it every frame without re-running the Three.js setup effect.
-  const characterScale = useTransform(scrollYProgress, [0, 0.3], [0.85, 1.5]);
+  // [size at the top of the page, size after scrolling]
+  const characterScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.7]);
   const scaleRef = useRef(1);
 
   useEffect(() => {
@@ -304,9 +318,9 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     key.position.set(2.2, 3.2, 4);
     scene.add(key);
 
-    // Everything that belongs to the character (head plane + helmet) lives in
-    // this group. Scaling it zooms ONLY the character; the backgrounds and the
-    // screen-space blob mask stay untouched.
+    // Everything that belongs to the character (head plane + helmet + ghost)
+    // lives in this group. Scaling it zooms ONLY the character; the
+    // backgrounds and the screen-space blob mask stay untouched.
     const characterGroup = new THREE.Group();
     scene.add(characterGroup);
 
@@ -370,6 +384,10 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     let headMesh, helmetGroup, headMaterial, ghostMat;
     let topBgMesh, bottomBgMesh;
 
+    // Bottom edge of the REAL person image (not the extra stretched strip),
+    // in the character group's own space. Filled in by init().
+    let characterBottom = 0;
+
     // Stretch a background plane so it exactly fills the visible screen at its
     // depth. The full image is always shown, whatever the window size.
     function fitBackground(mesh) {
@@ -384,6 +402,14 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
     function fitBackgrounds() {
       fitBackground(topBgMesh);
       fitBackground(bottomBgMesh);
+    }
+
+    // World Y of the bottom of the screen at the character's depth (z = 0).
+    // The vertical field of view is fixed, so this holds at any window size.
+    function screenBottomY() {
+      const halfH =
+        camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      return camera.position.y - halfH;
     }
 
     async function init() {
@@ -467,6 +493,11 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
         headMesh.position.set(0, -0.1 - (targetHeight * EXTEND) / 2, 0);
         characterGroup.add(headMesh); // scaled with the character
 
+        // The plane is taller than the image (the extra EXTEND strip at the
+        // bottom is just stretched edge pixels). The real image occupies the
+        // top `targetHeight` units, so its bottom edge is here:
+        characterBottom = headMesh.position.y + planeHeight / 2 - targetHeight;
+
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/libs/draco/gltf/");
         const gltfLoader = new GLTFLoader();
@@ -525,7 +556,9 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
             uMinY: { value: ghostBox.min.y },
             uMaxY: { value: ghostBox.max.y },
             uTime: { value: 0 },
-            uBase: { value: 0 }, // ghost opacity
+            uBase: { value: 0 }, // resting ghost opacity
+            uBandStrength: { value: 0.1 }, // opacity of the scanning light (0..1)
+            uBandWidth: { value: 0.07 }, // thickness of the scanning light
           },
           transparent: true,
           depthWrite: false,
@@ -576,9 +609,13 @@ export default function HeroBg({ mouseEnabled, scrollYProgress }) {
       if (!startTime) startTime = time;
       const t = (time - startTime) / 1000;
 
-      // Scroll-driven zoom: only the character group is scaled.
+      // Scroll-driven zoom: only the character group is scaled, and it is
+      // scaled from its BOTTOM edge: the group is moved so the bottom of the
+      // person image always stays glued to the bottom of the screen.
       // (Set before the ready block so the ghost's matrices are current.)
-      characterGroup.scale.setScalar(scaleRef.current);
+      const s = scaleRef.current;
+      characterGroup.scale.setScalar(s);
+      characterGroup.position.y = screenBottomY() - BOTTOM_BLEED - characterBottom * s;
 
       if (ready) {
         // ---- idle Z-sweep: drives the same pointer the mouse drives ----
