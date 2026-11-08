@@ -137,7 +137,7 @@ const ProjectsPage = () => {
   }
 
   return (
-    <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!">
+    <div className="bg-[#0A0A0A] relative min-h-[1500vh] overflow-hidden!">
       <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
         <Header header="All Work" />
         <h1 className="text-[80px] font-extrabold text-white leading-[100%] tracking-[-1.6px]">

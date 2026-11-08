@@ -1,27 +1,38 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import MenuButton from "../ui/MenuButton"
-import TextLogo from "../ui/TextLogo"
+import MenuButton from "../ui/MenuButton";
+import TextLogo from "../ui/TextLogo";
 import NavContainer from "../assets/svgs/NavContainer";
 import NavMenu from "./NavMenu";
 
 const Nav = () => {
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const isHomePage = location.pathname === "/";
+  const scrollThreshold = isHomePage ? 5000 : 150;
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 5000);
+      setIsScrolled(window.scrollY > scrollThreshold);
     };
+
+    handleScroll(); // check immediately on mount / route change
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [scrollThreshold]);
 
   const showContainer = isScrolled && !isMenuOpen;
 
   return (
     <>
-      <nav className={`max-w-screen fixed w-screen z-50 mx-auto flex items-center justify-center p-4 duration-300 ${isScrolled?'top-5':'top-0'}`}>
+      <nav
+        className={`max-w-screen fixed w-screen z-50 mx-auto flex items-center justify-center p-4 duration-300 ${
+          isScrolled ? "top-5" : "top-0"
+        }`}
+      >
         <div className="relative flex items-center justify-between w-full max-w-7xl">
           <motion.div
             animate={{ x: showContainer ? 90 : 0 }}
@@ -33,7 +44,10 @@ const Nav = () => {
             animate={{ x: showContainer ? -90 : 0 }}
             transition={{ type: "spring", stiffness: 280, damping: 28 }}
           >
-            <MenuButton active={isMenuOpen} open={() => setIsMenuOpen(!isMenuOpen)} />
+            <MenuButton
+              active={isMenuOpen}
+              open={() => setIsMenuOpen(!isMenuOpen)}
+            />
           </motion.div>
           <AnimatePresence>
             {showContainer && (
@@ -65,6 +79,7 @@ const Nav = () => {
         )}
       </AnimatePresence>
     </>
-  )
-}
-export default Nav
+  );
+};
+
+export default Nav;

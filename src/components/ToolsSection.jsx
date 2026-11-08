@@ -38,7 +38,7 @@ const ToolsSection = () => {
   const imageOpacity = useTransform(scrollYProgress, [0.55, 0.75, 0.95, 1], [1, 1, 0.6, 0])
 
   return (
-    <div ref={containerRef} className="h-[600vh] relative z-20" id="tools" style={{ marginTop: "-100vh" }}>
+    <div ref={containerRef} className="h-[350vh] relative z-20" id="tools" style={{ marginTop: "-100vh" }}>
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0A0A0A]">
         <motion.div className="relative w-full h-full">
           <motion.img
@@ -52,7 +52,7 @@ const ToolsSection = () => {
               opacity: imageOpacity
             }}
           />
-          <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30 h-full z-2">
+          <div className="relative w-full flex container flex-col gap-6.25 pt-30 pb-30 h-full z-2">
             <Header header="Tools & Proficiency" />
             <motion.div
               className="grid grid-cols-3 gap-5 ml-auto"

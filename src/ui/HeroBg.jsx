@@ -286,7 +286,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
   // Scroll-driven character scale. Kept in a ref so the render loop can read
   // it every frame without re-running the Three.js setup effect.
   // [size at the top of the page, size after scrolling]
-  const characterScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.7]);
+  const characterScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.25]);
   const scaleRef = useRef(1);
 
   useEffect(() => {

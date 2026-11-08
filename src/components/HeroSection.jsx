@@ -32,7 +32,7 @@ const HeroSection = () => {
     const maskHover = useMotionValue(0)
 
     const logoOpacity = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.38], [0, 0, 1, 1])
-    const logoScale = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.40], [2.5, 2.5, 1.15, 0.8])
+    const logoScale = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.40], [2.5, 1, 1, 0.8])
 
     const overlayOpacity = useTransform(scrollYProgress, [0, 0.2, 1], [0, 0.3, 0.3])
     const mouseEnabled = useTransform(scrollYProgress, [0, 0.2, 1], [1, 0, 0])

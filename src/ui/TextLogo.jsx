@@ -1,5 +1,7 @@
+import {useNavigate} from "react-router-dom";
 const TextLogo = ({ active }) => {
-  const onLogoClick = () => {
+  const navigate = useNavigate();
+  const onLogoClick = ()  => {
     if (active) {
       window.location.href = "mailto:info@fuiux.com";
     } else {
@@ -7,6 +9,7 @@ const TextLogo = ({ active }) => {
         behavior: "smooth",
         block: "start",
       });
+      navigate("/#home")
     }
   };
 
