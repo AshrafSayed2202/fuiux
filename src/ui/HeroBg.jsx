@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
 import { useTransform } from "framer-motion";
 import * as THREE from "three";
@@ -12,35 +13,23 @@ import helmetUrl from "../assets/images/helmet.glb?url";
 import topBg from "../assets/images/top-background.jpg";
 import bottomBg from "../assets/images/bottom-background.jpg";
 
-// Number of stored trail points (one is added per frame). It was 40; raised
-// to 64 so the auto sweep can have a longer trail. The hover look is
-// rescaled below so it behaves exactly as before.
 const SAMPLES = 64;
-
-/* ------------------------------------------------------------------ */
-/*  Character placement                                                */
-/*                                                                     */
-/*  The character is scaled from its BOTTOM edge, so it always starts  */
-/*  at the bottom of the screen and grows upward.                      */
-/*  BOTTOM_BLEED = how far the image bottom sits below the screen edge */
-/*  (hides any seam / gap). Raise it if you ever see a thin gap.       */
-/* ------------------------------------------------------------------ */
 const BOTTOM_BLEED = 0.0;
 
-/* ------------------------------------------------------------------ */
-/*  Idle auto-sweep (Z shape)                                          */
-/* ------------------------------------------------------------------ */
-const IDLE_MS = 3000; // idle time before a sweep / between sweeps
-const SWEEP_MS = 1100; // how long one sweep takes (smaller = faster)
+const IDLE_MS = 3000;
+const SWEEP_MS = 1100;
 
-// Z path in NDC: top-left -> top-right -> bottom-left -> bottom-right
+const PORTRAIT_MAX_ASPECT = 0.85;
+const PORTRAIT_LIFT = 0.35;
+const MOBILE_CARD_CENTER_Y = 0.1;
+const MOBILE_FACE_LOCAL_Y = 0;
 const Z_PTS = [
   [-0.9, 0.8],
   [0.9, 0.8],
   [-0.9, -0.8],
   [0.9, -0.8],
 ];
-const Z_SPLIT = [0.28, 0.72]; // share of time per segment (diagonal is longest)
+const Z_SPLIT = [0.28, 0.72];
 
 function zPath(s) {
   let i, t;
@@ -59,38 +48,27 @@ function zPath(s) {
   return { x: a[0] + (b[0] - a[0]) * t, y: a[1] + (b[1] - a[1]) * t };
 }
 
-/* ------------------------------------------------------------------ */
-/*  Blob look: HOVER (real mouse) vs AUTO (idle sweep)                 */
-/*                                                                     */
-/*  HOVER is exactly what you had before. AUTO is blended in only      */
-/*  while the idle sweep is running.                                   */
-/*                                                                     */
-/*  radius : size of the blob head                                     */
-/*  trail  : trail length in FRAMES (max SAMPLES - 1)                  */
-/*  taper  : < 1 = fat body, > 1 = thin pointy tail                    */
-/*  follow : how tightly the blob chases the pointer (0..1)            */
-/* ------------------------------------------------------------------ */
 const HOVER_LOOK = {
   radius: 0.30,
-  trail: 35.1, // = old uLength 0.9 * 39 samples
+  trail: 35.1,
   taper: 0.72,
   follow: 0.18,
 };
 const AUTO_LOOK = {
-  radius: 0.45, // bigger blob
-  trail: 46, // longer trail
-  taper: 0.55, // fatter body so the long trail reads as thick
-  follow: 0.28, // keeps up with the faster movement
+  radius: 0.45,
+  trail: 46,
+  taper: 0.55,
+  follow: 0.28,
 };
 
 const mixv = (a, b, m) => a + (b - a) * m;
+const WIPE_MS = 900;
 
-// Hovering the small mask wipes the real helmet in from top to bottom.
-const WIPE_MS = 900; // how long the wipe takes (and the way back up)
+function getResponsiveCharacterScale(aspect) {
+  if (aspect >= PORTRAIT_MAX_ASPECT) return 1;
+  return aspect * 0.96;
+}
 
-/* ------------------------------------------------------------------ */
-/*  Head (person) shaders                                              */
-/* ------------------------------------------------------------------ */
 const headVertex = `
   uniform float uExtend;
   varying vec2 vUv;
@@ -124,11 +102,6 @@ const headFragment = `
   }
 `;
 
-/* ------------------------------------------------------------------ */
-/*  Ghost "scanned" helmet shaders                                     */
-/*  A flat white copy of the helmet at ~0.1 opacity, with a bright     */
-/*  band travelling top -> bottom like a scanner.                      */
-/* ------------------------------------------------------------------ */
 const ghostVertex = `
   uniform mat4 uInv;
   varying vec3 vLocal;
@@ -156,30 +129,15 @@ const ghostFragment = `
   varying vec3 vView;
   void main() {
     float t = clamp((vLocal.y - uMinY) / max(uMaxY - uMinY, 1e-4), 0.0, 1.0);
-
-    // scan band travelling top -> bottom, then a pause before repeating
-    // (t = 1 is the top of the helmet, t = 0 the bottom)
     float pos = 1.08 - fract(uTime * 0.5) * 1.16;
     float band = smoothstep(uBandWidth, 0.0, abs(t - pos));
-
-    // faint scanlines + soft rim so the silhouette reads as a hologram
     float lines = 0.5 + 0.5 * sin(t * 220.0 - uTime * 2.0);
     float rim = pow(1.0 - abs(dot(normalize(vN), normalize(vView))), 2.0);
-
     float a = uBase + band * uBandStrength + lines * 0.02;
     gl_FragColor = vec4(1.0, 1.0, 1.0, a);
   }
 `;
 
-/* ------------------------------------------------------------------ */
-/*  Shared "liquid blob" mask (used by the top background + helmet)    */
-/*                                                                     */
-/*  1. For every pixel find how deep it is inside the mouse trail      */
-/*     (thick head, thin tail).                                        */
-/*  2. Add animated noise to that value -> irregular, lumpy edge with  */
-/*     little wispy tails.                                             */
-/*  3. Hard (but anti-aliased) cut at 0 -> flat solid shape.           */
-/* ------------------------------------------------------------------ */
 const trailChunk = `
   uniform vec2 uTrail[${SAMPLES}];
   uniform float uPace;
@@ -208,7 +166,6 @@ const trailChunk = `
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
   }
 
-  // > 0 inside the blob, < 0 outside
   float revealField(vec2 ndc) {
     float gate = smoothstep(0.01, 0.12, uPace);
     if (gate <= 0.0) return -1.0;
@@ -232,7 +189,6 @@ const trailChunk = `
       best = max(best, 1.0 - dist / r);
     }
 
-    // two octaves of slowly moving noise -> lumpy liquid outline
     vec2 q = point * uNoiseScale;
     float n = revealNoise(q + vec2(uTime * 0.35, -uTime * 0.22)) * 0.8
             + revealNoise(q * 2.1 + vec2(-uTime * 0.5, uTime * 0.3)) * 0.2;
@@ -244,9 +200,6 @@ const trailChunk = `
   }
 `;
 
-/* ------------------------------------------------------------------ */
-/*  Top background: fully visible, a blob is cut out of it             */
-/* ------------------------------------------------------------------ */
 const bgVertex = `
   varying vec4 vClip;
   varying vec2 vUv;
@@ -259,13 +212,15 @@ const bgVertex = `
 
 const bgFragment = `
   uniform sampler2D uMap;
+  uniform vec2 uUvScale;
+  uniform vec2 uUvOffset;
   varying vec4 vClip;
   varying vec2 vUv;
   ${trailChunk}
 
   void main() {
     vec2 ndc = vClip.xy / vClip.w;
-    vec4 color = texture2D(uMap, vUv);
+    vec4 color = texture2D(uMap, vUv * uUvScale + uUvOffset);
     float cut = revealMask(ndc);
     gl_FragColor = vec4(color.rgb, color.a * (1.0 - cut));
   }
@@ -283,11 +238,10 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
     return () => unsubscribe();
   }, [mouseEnabled]);
 
-  // Scroll-driven character scale. Kept in a ref so the render loop can read
-  // it every frame without re-running the Three.js setup effect.
-  // [size at the top of the page, size after scrolling]
-  const characterScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.25]);
+  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
+  const characterScale = useTransform(scrollYProgress, [0, 0.3], [1, isMobile ? 0.6 : 1.25]);
   const scaleRef = useRef(1);
+  const respScaleRef = useRef(1);
 
   useEffect(() => {
     scaleRef.current = characterScale.get();
@@ -297,9 +251,6 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
     return () => unsub();
   }, [characterScale]);
 
-  // Hovering the small mask in the side panel wipes the real helmet in from
-  // top to bottom. Kept in a ref (like the scale) so the Three.js setup
-  // effect doesn't re-run.
   const maskHoverRef = useRef(0);
 
   useEffect(() => {
@@ -335,9 +286,6 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
     key.position.set(2.2, 3.2, 4);
     scene.add(key);
 
-    // Everything that belongs to the character (head plane + helmet + ghost)
-    // lives in this group. Scaling it zooms ONLY the character; the
-    // backgrounds and the screen-space blob mask stay untouched.
     const characterGroup = new THREE.Group();
     scene.add(characterGroup);
 
@@ -365,16 +313,12 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
     const pointer = { x: 0, y: 0 };
     const smoothed = { x: 0, y: 0 };
     let pace = 0;
-    let wipe = 0; // 0 = helmet only inside the blob, 1 = wipe finished (helmet fully visible)
+    let wipe = 0;
     let lastFrame = 0;
     let aspect = 1;
     let ready = false;
     let startTime = null;
 
-    // Idle auto-sweep state. A real mouse move cancels it and restarts the
-    // idle timer. Sweeps alternate: forward (TL -> BR), then reverse (BR -> TL).
-    //   mix     : 0 = hover look, 1 = auto-sweep look (eased every frame)
-    //   release : how fast mix falls back to 0 (fast when the mouse takes over)
     const auto = {
       active: false,
       start: 0,
@@ -384,26 +328,20 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
       release: 0.06,
     };
 
-    /* ---------------- blob tuning ---------------- */
-    // radius / length / taper start at the HOVER look and are blended toward
-    // the AUTO look inside animate() while a sweep is running.
     const revealUniforms = {
       uTrail: { value: trail },
       uPace: { value: 0 },
       uAspect: { value: 1 },
-      uRadius: { value: HOVER_LOOK.radius }, // size of the blob head
-      uLength: { value: HOVER_LOOK.trail / (SAMPLES - 1) }, // tail length (0..1)
-      uTaper: { value: HOVER_LOOK.taper }, // < 1 = fat body, > 1 = thin pointy tail
-      uNoiseAmp: { value: 1.0 }, // how lumpy / irregular the edge is
-      uNoiseScale: { value: 4 }, // size of the lumps (higher = smaller lumps)
-      uEdge: { value: 0 }, // edge softness (smaller = crisper)
+      uRadius: { value: HOVER_LOOK.radius },
+      uLength: { value: HOVER_LOOK.trail / (SAMPLES - 1) },
+      uTaper: { value: HOVER_LOOK.taper },
+      uNoiseAmp: { value: 1.0 },
+      uNoiseScale: { value: 4 },
+      uEdge: { value: 0 },
       uTime: { value: 0 },
-      uForce: { value: 0 }, // wipe progress 0..1, top -> bottom (small-mask hover)
+      uForce: { value: 0 },
     };
 
-    // Helmet-space info shared by the ghost and the real helmet shaders:
-    //   uInv          = inverse of the helmet group's world matrix (world -> helmet space)
-    //   uMinY / uMaxY = the helmet's vertical extent in helmet space
     const helmetSpace = {
       uInv: { value: new THREE.Matrix4() },
       uMinY: { value: 0 },
@@ -412,13 +350,28 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
 
     let headMesh, helmetGroup, headMaterial, ghostMat;
     let topBgMesh, bottomBgMesh;
-
-    // Bottom edge of the REAL person image (not the extra stretched strip),
-    // in the character group's own space. Filled in by init().
+    let topTex, bottomTex;
     let characterBottom = 0;
 
-    // Stretch a background plane so it exactly fills the visible screen at its
-    // depth. The full image is always shown, whatever the window size.
+    const topCover = {
+      uUvScale: { value: new THREE.Vector2(1, 1) },
+      uUvOffset: { value: new THREE.Vector2(0, 0) },
+    };
+
+    function cover(tex, scale, offset) {
+      const img = tex.image;
+      const imgAspect =
+        (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+      let sx = 1;
+      let sy = 1;
+      if (camera.aspect < 1) {
+        if (camera.aspect < imgAspect) sx = camera.aspect / imgAspect;
+        else sy = imgAspect / camera.aspect;
+      }
+      scale.set(sx, sy);
+      offset.set((1 - sx) / 2, (1 - sy) / 2);
+    }
+
     function fitBackground(mesh) {
       if (!mesh) return;
       const dist = camera.position.z - mesh.position.z;
@@ -431,10 +384,14 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
     function fitBackgrounds() {
       fitBackground(topBgMesh);
       fitBackground(bottomBgMesh);
+      if (topTex) {
+        cover(topTex, topCover.uUvScale.value, topCover.uUvOffset.value);
+      }
+      if (bottomTex) {
+        cover(bottomTex, bottomTex.repeat, bottomTex.offset);
+      }
     }
 
-    // World Y of the bottom of the screen at the character's depth (z = 0).
-    // The vertical field of view is fixed, so this holds at any window size.
     function screenBottomY() {
       const halfH =
         camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
@@ -443,33 +400,34 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
 
     async function init() {
       try {
-        const [diffuse, depth, alpha, normal, topTex, bottomTex] = await Promise.all([
-          // Not flagged sRGB on purpose: the custom shaders write the texture
-          // values straight to the screen, so they must pass through untouched.
+        const [diffuse, depth, alpha, normal, loadedTop, loadedBottom] = await Promise.all([
           loadTex(personDiffuse, false),
           loadTex(depthMap),
           loadTex(alphaMap),
           loadTex(normalMap),
-          loadTex(topBg, false), // custom shader -> no sRGB flag
-          loadTex(bottomBg, true), // MeshBasicMaterial handles sRGB itself
+          loadTex(topBg, false),
+          loadTex(bottomBg, true),
         ]);
 
-        // BOTTOM background: only seen through the blob (NOT scaled)
+        topTex = loadedTop;
+        bottomTex = loadedBottom;
+
         const bottomMat = new THREE.MeshBasicMaterial({
           map: bottomTex,
           transparent: false,
-          toneMapped: false, // same raw colors as the top image
+          toneMapped: false,
         });
         bottomBgMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), bottomMat);
         bottomBgMesh.position.z = -2.4;
         scene.add(bottomBgMesh);
 
-        // TOP background: visible by default, the blob cuts it away (NOT scaled)
         const topMat = new THREE.ShaderMaterial({
           vertexShader: bgVertex,
           fragmentShader: bgFragment,
           uniforms: {
             uMap: { value: topTex },
+            uUvScale: topCover.uUvScale,
+            uUvOffset: topCover.uUvOffset,
             uTrail: revealUniforms.uTrail,
             uPace: revealUniforms.uPace,
             uAspect: revealUniforms.uAspect,
@@ -490,7 +448,6 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
 
         fitBackgrounds();
 
-        // Use the REAL aspect ratio of the person image
         const imgW = diffuse.image.naturalWidth || diffuse.image.width || 1920;
         const imgH = diffuse.image.naturalHeight || diffuse.image.height || 950;
         const ASPECT = imgW / imgH;
@@ -520,11 +477,8 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
         const headGeo = new THREE.PlaneGeometry(targetWidth, planeHeight);
         headMesh = new THREE.Mesh(headGeo, headMaterial);
         headMesh.position.set(0, -0.1 - (targetHeight * EXTEND) / 2, 0);
-        characterGroup.add(headMesh); // scaled with the character
+        characterGroup.add(headMesh);
 
-        // The plane is taller than the image (the extra EXTEND strip at the
-        // bottom is just stretched edge pixels). The real image occupies the
-        // top `targetHeight` units, so its bottom edge is here:
         characterBottom = headMesh.position.y + planeHeight / 2 - targetHeight;
 
         const dracoLoader = new DRACOLoader();
@@ -542,7 +496,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
           mat.side = THREE.FrontSide;
           mat.transparent = true;
           mat.depthWrite = false;
-          obj.renderOrder = 2; // real helmet draws AFTER (on top of) the ghost
+          obj.renderOrder = 2;
           mat.onBeforeCompile = (shader) => {
             Object.assign(shader.uniforms, revealUniforms);
             Object.assign(shader.uniforms, helmetSpace);
@@ -554,8 +508,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
               .replace("#include <alphamap_fragment>", `
                 #include <alphamap_fragment>
                 vec2 revealNdc = vRevealClip.xy / vRevealClip.w;
-                // top -> bottom wipe in helmet space (uForce = progress 0..1)
-                float wipeFeather = 0.06; // edge softness (smaller = crisper)
+                float wipeFeather = 0.06;
                 float wipeT = clamp((vHelmetLocal.y - uMinY) / max(uMaxY - uMinY, 1e-4), 0.0, 1.0);
                 float wipeLine = (1.0 + wipeFeather) * (1.0 - uForce);
                 float wipeMask = smoothstep(wipeLine - wipeFeather, wipeLine, wipeT);
@@ -576,15 +529,10 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
         helmetGroup = new THREE.Group();
         helmetGroup.add(root);
 
-        // ---- ghost copy of the helmet (white, ~0.1 opacity, scan band) ----
         helmetGroup.updateMatrixWorld(true);
         const ghostBox = new THREE.Box3().setFromObject(root);
-        // helmet-local bounds (helmetGroup is not attached yet, so this is
-        // simply the inverse of its own matrix)
         ghostBox.applyMatrix4(helmetGroup.matrixWorld.clone().invert());
 
-        // helmet's vertical extent in helmet space (used by the ghost scan
-        // AND by the real helmet's top -> bottom wipe)
         helmetSpace.uMinY.value = ghostBox.min.y;
         helmetSpace.uMaxY.value = ghostBox.max.y;
 
@@ -592,13 +540,13 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
           vertexShader: ghostVertex,
           fragmentShader: ghostFragment,
           uniforms: {
-            uInv: helmetSpace.uInv, // shared with the real helmet's wipe
+            uInv: helmetSpace.uInv,
             uMinY: helmetSpace.uMinY,
             uMaxY: helmetSpace.uMaxY,
             uTime: { value: 0 },
-            uBase: { value: 0 }, // resting ghost opacity
-            uBandStrength: { value: 0.1 }, // opacity of the scanning light (0..1)
-            uBandWidth: { value: 0.07 }, // thickness of the scanning light
+            uBase: { value: 0 },
+            uBandStrength: { value: 0.1 },
+            uBandWidth: { value: 0.07 },
           },
           transparent: true,
           depthWrite: false,
@@ -609,12 +557,12 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
         ghost.traverse((o) => {
           if (o.isMesh) {
             o.material = ghostMat;
-            o.renderOrder = 1; // ghost sits underneath the real helmet
+            o.renderOrder = 1;
           }
         });
         helmetGroup.add(ghost);
 
-        characterGroup.add(helmetGroup); // scaled with the character
+        characterGroup.add(helmetGroup);
 
         ready = true;
       } catch (err) {
@@ -627,17 +575,22 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
       const h = canvas.clientHeight || window.innerHeight;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
+      if (camera.aspect < PORTRAIT_MAX_ASPECT) {
+        camera.position.z = 4.6;
+      } else {
+        camera.position.z = 6.5;
+      }
       camera.updateProjectionMatrix();
       aspect = camera.aspect;
       revealUniforms.uAspect.value = aspect;
+      respScaleRef.current = getResponsiveCharacterScale(aspect);
       fitBackgrounds();
     }
 
     function onPointer(e) {
       if (!isMouseActive) return;
-      // a real mouse move cancels any running sweep and restarts the idle timer
       auto.active = false;
-      auto.release = 0.25; // hand the look back to hover quickly
+      auto.release = 0.25;
       auto.nextAt = performance.now() + IDLE_MS;
       const rect = canvas.getBoundingClientRect();
       pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -649,39 +602,41 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
       if (!startTime) startTime = time;
       const t = (time - startTime) / 1000;
 
-      // Scroll-driven zoom: only the character group is scaled, and it is
-      // scaled from its BOTTOM edge: the group is moved so the bottom of the
-      // person image always stays glued to the bottom of the screen.
-      // (Set before the ready block so the ghost's matrices are current.)
-      const s = scaleRef.current;
+      const s = scaleRef.current * respScaleRef.current;
       characterGroup.scale.setScalar(s);
-      characterGroup.position.y = screenBottomY() - BOTTOM_BLEED - characterBottom * s;
+      const portraitShift = aspect < PORTRAIT_MAX_ASPECT ? PORTRAIT_LIFT * s : 0;
+      const bottomY = screenBottomY() - BOTTOM_BLEED - characterBottom * s + portraitShift;
+      if (window.matchMedia("(max-width: 639px)").matches) {
+        const p = Math.min(1, Math.max(0, scrollYProgress.get() / 0.3));
+        const centeredY = MOBILE_CARD_CENTER_Y - MOBILE_FACE_LOCAL_Y * s;
+        characterGroup.position.y = bottomY + (centeredY - bottomY) * p;
+      } else {
+        characterGroup.position.y = bottomY;
+      }
 
       if (ready) {
-        // ---- idle Z-sweep: drives the same pointer the mouse drives ----
         if (isMouseActive) {
           if (!auto.active && time >= auto.nextAt) {
             auto.active = true;
             auto.start = time;
-            auto.release = 0.06; // gentle fade back to hover when it ends
+            auto.release = 0.06;
           }
           if (auto.active) {
             const u = Math.min((time - auto.start) / SWEEP_MS, 1);
-            const p = zPath(auto.reverse ? 1 - u : u); // reverse = BR -> TL
+            const p = zPath(auto.reverse ? 1 - u : u);
             pointer.x = p.x;
             pointer.y = p.y;
             if (u >= 1) {
               auto.active = false;
-              auto.reverse = !auto.reverse; // next sweep runs backwards
+              auto.reverse = !auto.reverse;
               auto.nextAt = time + IDLE_MS;
             }
           }
         }
 
-        // ---- blend between the hover look (0) and the auto look (1) ----
         const goal = auto.active ? 1 : 0;
         auto.mix += (goal - auto.mix) * (goal > auto.mix ? 0.12 : auto.release);
-        if (auto.mix < 0.001) auto.mix = 0; // snaps to EXACTLY the hover look
+        if (auto.mix < 0.001) auto.mix = 0;
         const m = auto.mix;
 
         revealUniforms.uRadius.value = mixv(HOVER_LOOK.radius, AUTO_LOOK.radius, m);
@@ -706,14 +661,10 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
         revealUniforms.uPace.value = pace;
         revealUniforms.uTime.value = t;
 
-        // ---- small mask hovered: wipe the real helmet in from top to bottom ----
-        // (only while the mouse effect is enabled, so it can't get stuck on
-        // after scrolling away). When the hover ends the wipe runs back up.
         const dt = lastFrame ? Math.min((time - lastFrame) / 1000, 0.05) : 0;
         lastFrame = time;
         const wipeDir = isMouseActive && maskHoverRef.current > 0.5 ? 1 : -1;
         wipe = Math.min(1, Math.max(0, wipe + (wipeDir * dt) / (WIPE_MS / 1000)));
-        // ease in/out so the overlay accelerates and settles
         revealUniforms.uForce.value = wipe * wipe * (3 - 2 * wipe);
 
         if (headMaterial) {
@@ -726,7 +677,6 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
           helmetGroup.position.y = 0.42 - smoothed.y * 0.01;
         }
 
-        // keep the ghost's scan anchored to the helmet's own space
         if (ghostMat && helmetGroup) {
           characterGroup.updateMatrixWorld(true);
           helmetSpace.uInv.value.copy(helmetGroup.matrixWorld).invert();
@@ -757,7 +707,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
       ref={containerRef}
       className="relative h-full w-full overflow-hidden"
     >
-      <canvas ref={canvasRef} className="absolute inset-0 w-full" />
+      <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
     </div>
   );
 }

@@ -10,6 +10,9 @@ const Nav = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 768 : true
+  );
 
   const isHomePage = location.pathname === "/";
   const scrollThreshold = isHomePage ? 5000 : 150;
@@ -19,18 +22,30 @@ const Nav = () => {
       setIsScrolled(window.scrollY > scrollThreshold);
     };
 
-    handleScroll(); // check immediately on mount / route change
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollThreshold]);
 
-  const showContainer = isScrolled && !isMenuOpen;
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Scroll effect (container + logo/button shift + top offset) only on md+
+  const showContainer = isScrolled && !isMenuOpen && isLargeScreen;
+  const applyScrollStyles = isScrolled && isLargeScreen;
 
   return (
     <>
       <nav
         className={`max-w-screen fixed w-screen z-50 mx-auto flex items-center justify-center p-4 duration-300 ${
-          isScrolled ? "top-5" : "top-0"
+          applyScrollStyles ? "top-5" : "top-0"
         }`}
       >
         <div className="relative flex items-center justify-between w-full max-w-7xl">

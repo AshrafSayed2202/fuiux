@@ -1,6 +1,6 @@
 const KeyResults = () => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="915" height="390" viewBox="0 0 915 390" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 915 390" fill="none" className="w-full h-full">
       <path d="M331.401 0L281.378 42.5275H352.244L400.182 0H331.401Z" fill="#FF0033" />
       <path d="M260.535 42.5275L212.597 0H314.727L260.535 42.5275Z" fill="#FF0033" />
       <path d="M416.856 0L368.918 42.5275H435.615L487.722 0H416.856Z" fill="#FF0033" />

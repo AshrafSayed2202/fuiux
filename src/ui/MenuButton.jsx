@@ -39,7 +39,7 @@ const MenuButton = ({ open }) => {
 
   return (
     <>
-      <div className="flex items-center overflow-hidden relative z-60">
+      <div className="flex items-center overflow-hidden relative z-60 translate-x-5 sm:translate-x-0">
         {/* Hire me */}
         <div
           className={`h-10.5 w-37 relative group overflow-hidden ${isActive ? "pointer-events-none select-none" : "cursor-pointer"

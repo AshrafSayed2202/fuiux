@@ -133,7 +133,7 @@ const ProjectDetail = () => {
                 </span>
               </div>
               <div className="p-6 flex items-center justify-between lg:justify-center text-sm font-medium text-[#FF6467] font-[inter]! relative">
-                <span className="h-14.5 w-14.5 bg-[#0a0a0a] absolute -top-6.5 -right-8.25 border-b-[3px] border-[#6C061A] rotate-50"></span>
+                <span className="h-14.5 w-14.5 bg-[#0a0a0a] hidden lg:block absolute -top-6.5 -right-8.25 border-b-[3px] border-[#6C061A] rotate-50"></span>
                 <div className="font-mono">{project.year || "2024"}</div>
               </div>
             </div>
@@ -225,23 +225,23 @@ const ProjectDetail = () => {
                   ))}
 
                   {project.keyResults?.length > 0 && (
-                    <div className="my-16">
-                      <div className="w-228.75 h-97.5 relative">
-                        <div className="absolute z-[-1]">
+                    <div className="my-16 w-full max-w-228.75 mx-auto">
+                      <div className="relative w-full aspect-915/390">
+                        <div className="absolute inset-0 z-[-1]">
                           <KeyResults />
                         </div>
-                        <h4 className="text-2xl font-extrabold text-white absolute left-[3%] top-[8%]">
+                        <h4 className="text-base sm:text-xl md:text-2xl font-extrabold text-white absolute left-[3%] top-[6%] sm:top-[8%]">
                           Key Results
                         </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] px-6 md:px-0">
+                        <div className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[82%] px-2 sm:px-4 md:px-0">
                           {project.keyResults.map((result, i) => {
                             const parts = result.split(" ")
                             return (
                               <div key={i}>
-                                <span className="block text-4xl md:text-5xl font-black mb-2">
+                                <span className="block text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-1 sm:mb-2">
                                   {parts[0]}
                                 </span>
-                                <span className="text-xs font-mono uppercase tracking-widest text-white/60">
+                                <span className="text-[9px] sm:text-[10px] md:text-xs font-mono uppercase tracking-widest text-white/60">
                                   {parts.slice(1).join(" ")}
                                 </span>
                               </div>
@@ -366,7 +366,7 @@ const ProjectDetail = () => {
           </div>
         </section>
       </main>
-      <Footer />
+      <Footer overlay={false} />
 
       <AnimatePresence>
         {showScrollTop && (
@@ -379,7 +379,7 @@ const ProjectDetail = () => {
             className="fixed bottom-8 right-8 z-50 w-12 h-12 rounded-full bg-[#FF0033] text-white flex items-center justify-center shadow-lg hover:bg-[#ff0033] transition-colors cursor-pointer"
           >
             <span className="-rotate-45">
-            <Arrow/>
+              <Arrow />
             </span>
           </motion.button>
         )}

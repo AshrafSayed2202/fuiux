@@ -14,6 +14,9 @@ import clickSound from "../assets/sounds/click.wav"
 import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
 import pricingHoverSound from "../assets/sounds/pricing-hover.wav"
 
+const CARD_DESIGN_WIDTH = 466
+const DESKTOP_QUERY = "(min-width: 1024px)"
+
 const plans = [
   {
     id: "part-time",
@@ -107,6 +110,58 @@ const CrossIcon = () => (
   </span>
 )
 
+const ScaledCard = ({ designHeight, children }) => {
+  const wrapRef = useRef(null)
+  const [scale, setScale] = useState(1)
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(DESKTOP_QUERY).matches
+  )
+
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+
+    const update = () => {
+      const desktop = window.matchMedia(DESKTOP_QUERY).matches
+      setIsDesktop(desktop)
+      setScale(desktop ? 1 : Math.min(1, el.clientWidth / CARD_DESIGN_WIDTH))
+    }
+
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    window.addEventListener("resize", update)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", update)
+    }
+  }, [])
+
+  if (isDesktop) {
+    return <div ref={wrapRef}>{children}</div>
+  }
+
+  return (
+    <div
+      ref={wrapRef}
+      className="w-full max-w-116.5 mx-auto"
+      style={{ height: designHeight * scale }}
+    >
+      <div
+        style={{
+          width: CARD_DESIGN_WIDTH,
+          height: designHeight,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
 const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
   const isMid = plan.featured
   const price = plan.prices[billing]
@@ -143,14 +198,14 @@ const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
       className={`relative flex flex-col ${isMid ? "h-164.5" : "h-154.5"}`}
     >
       <div className="absolute z-3 left-0 top-0 scale-[0.95]">
-        <span className={`duration-300 absolute z-3 ${(isMid) ? 'opacity-100' : 'opacity-0'}`}>
+        <span className={`duration-300 absolute z-3  ${(isMid) ? 'opacity-100' : 'opacity-0'}`}>
           <PricingCardNumb2 isHovered={isHovered} />
         </span>
         <span className={`duration-300 absolute z-3 ${(isMid) ? 'opacity-0' : 'opacity-100'}`}>
           <PricingCardNumb isHovered={isHovered} />
         </span>
       </div>
-      <div className={`absolute z-5 right-12 ${isMid ? "top-16.5" : "top-10"} flex flex-col-reverse gap-1.25`}>
+      <div className={`absolute z-5 right-14 sm:right-12 ${isMid ? "top-16.5" : "top-10"} flex flex-col-reverse gap-1.25`}>
         {Array.from({ length: 12 }).map((_, index) => {
           const filled = index < filledCount
           return (
@@ -240,7 +295,7 @@ const PricingSection = () => {
   }
   return (
     <div className="bg-[#0A0A0A] relative min-h-screen overflow-hidden!" id="pricing">
-      <div className="relative w-full flex container flex-col gap-6.25 pt-20 pb-30">
+      <div className="relative w-full flex container flex-col gap-6.25 px-5 lg:px-0 pt-16 lg:pt-20 pb-20 lg:pb-30">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -250,7 +305,7 @@ const PricingSection = () => {
           <Header header="Pricing" centered={true} />
         </motion.div>
         <motion.h1
-          className="text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-1.6px]"
+          className="text-[38px] sm:text-6xl lg:text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-0.8px] lg:tracking-[-1.6px]"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -260,13 +315,13 @@ const PricingSection = () => {
           <span className="neon-text"> transparent </span> pricing.
         </motion.h1>
         <motion.p
-          className="text-white/40 text-base font-normal leading-6 text-center"
+          className="text-white/40 text-[12px] lg:text-base font-normal leading-5 lg:leading-6 text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
         >
-          No hidden fees. No vague scope. Pick the plan that fits your project and <br /> let&apos;s build something remarkable.
+          No hidden fees. No vague scope. Pick the plan that fits your project and <br className="hidden lg:block" /> let&apos;s build something remarkable.
         </motion.p>
 
         <motion.div
@@ -284,7 +339,7 @@ const PricingSection = () => {
                 playClickHover()
               }}
               onMouseEnter={playSecondaryHover}
-              className={`px-8 py-3.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${billing === "hourly"
+              className={`px-6 lg:px-8 py-2.5 lg:py-3.5 rounded-md text-[13px] lg:text-sm font-medium transition-colors cursor-pointer ${billing === "hourly"
                 ? "text-[#FF2B2B] border border-[#FF2B2B] bg-[#FF2B2B]/10"
                 : "text-white/70 border border-transparent"
                 }`}
@@ -298,7 +353,7 @@ const PricingSection = () => {
                 playClickHover()
               }}
               onMouseEnter={playSecondaryHover}
-              className={`px-8 py-3.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${billing === "monthly"
+              className={`px-6 lg:px-8 py-2.5 lg:py-3.5 rounded-md text-[13px] lg:text-sm font-medium transition-colors cursor-pointer ${billing === "monthly"
                 ? "text-[#FF2B2B] border border-[#FF2B2B] bg-[#FF2B2B]/10"
                 : "text-white/70 border border-transparent"
                 }`}
@@ -308,7 +363,7 @@ const PricingSection = () => {
           </div>
         </motion.div>
 
-        <div className="mt-10 grid grid-cols-1 lg:grid-cols-3 items-end">
+        <div className="mt-6 lg:mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-0 items-end translate-x-3 sm:translate-x-0">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -317,13 +372,15 @@ const PricingSection = () => {
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 + index * 0.15 }}
             >
-              <PlanCard
-                plan={plan}
-                billing={billing}
-                isHovered={hoveredId === plan.id}
-                onEnter={() => setHoveredId(plan.id)}
-                onLeave={() => setHoveredId(null)}
-              />
+              <ScaledCard designHeight={plan.featured ? 658 : 618}>
+                <PlanCard
+                  plan={plan}
+                  billing={billing}
+                  isHovered={hoveredId === plan.id}
+                  onEnter={() => setHoveredId(plan.id)}
+                  onLeave={() => setHoveredId(null)}
+                />
+              </ScaledCard>
             </motion.div>
           ))}
         </div>

@@ -27,8 +27,8 @@ const LetsSection = () => {
 
   return (
     <>
-      <div className="relative" style={{ height: "calc(200vh + 300px)" }} id="contact">
-        <div className="sticky top-0 h-screen z-10 bg-[#0A0A0A] overflow-hidden flex items-center justify-center">
+      <div className="relative lg:h-[calc(200vh+300px)]" id="contact">
+        <div className="relative lg:sticky top-0 min-h-screen lg:h-screen z-10 bg-[#0A0A0A] overflow-hidden flex flex-col lg:flex-row lg:items-center lg:justify-center">
           <img
             src={LetsBg1}
             alt="lets-bg-1"
@@ -39,18 +39,21 @@ const LetsSection = () => {
             alt="lets-bg-2"
             className="absolute top-1/2 left-1/2 object-cover translate-x-[-50%] translate-y-[-50%]"
           />
-          <img
-            src={LetsChar1}
-            alt="lets-char-1"
-            className="absolute bottom-0 right-0 h-full object-cover object-center"
-          />
-          <img
-            src={LetsChar2}
-            alt="lets-char-2"
-            className="absolute bottom-0 left-0 h-full object-cover object-center"
-          />
 
-          <div className="relative w-full flex container flex-col gap-14 pt-20 pb-30">
+          <div className="order-2 lg:order-0 relative mt-auto h-[105vw] max-h-140 w-full lg:contents">
+            <img
+              src={LetsChar1}
+              alt="lets-char-1"
+              className="absolute bottom-0 right-0 h-full w-auto max-w-[50%] lg:max-w-full object-cover object-left lg:object-center"
+            />
+            <img
+              src={LetsChar2}
+              alt="lets-char-2"
+              className="absolute bottom-0 left-0 h-full w-auto max-w-[50%] lg:max-w-full object-cover object-right lg:object-center"
+            />
+          </div>
+
+          <div className="order-1 lg:order-0 relative z-10 w-full flex container flex-col gap-6 lg:gap-14 px-5 lg:px-0 pt-24 lg:pt-20 pb-10 lg:pb-30">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -60,7 +63,7 @@ const LetsSection = () => {
               <Header header="Let's collaborate" centered={true} Line={false} />
             </motion.div>
             <motion.h1
-              className="text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-1.6px]"
+              className="text-[38px] sm:text-6xl lg:text-[80px] font-extrabold text-white text-center leading-[100%] tracking-[-0.8px] lg:tracking-[-1.6px]"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.4 }}
@@ -70,14 +73,14 @@ const LetsSection = () => {
               <span className="neon-text"> mind? </span>
             </motion.h1>
             <motion.p
-              className="text-white/40 text-base font-normal leading-6 text-center"
+              className="text-white/40 text-[12px] lg:text-base font-normal leading-5 lg:leading-6 text-center"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.4 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
             >
               I'm open to freelance projects, full-time roles, and long-term{" "}
-              <br /> partnerships. Let's make something great together.
+              <br className="hidden lg:block" /> partnerships. Let's make something great together.
             </motion.p>
 
             <motion.div
