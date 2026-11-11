@@ -121,18 +121,18 @@ const ProjectDetail = () => {
         <div className="max-w-360 mx-auto px-4 sm:px-6 mb-20">
           <div className=" bg-[#0A0A0A] relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-4 border-[#6C061A] border-[3px] border-b-0">
-              <div className="lg:col-span-3 py-6 px-12 border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-[#6C061A] flex items-center gap-3">
+              <div className="lg:col-span-3 py-4 sm:py-6 px-4 sm:px-12 border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-[#6C061A] flex items-center gap-2 sm:gap-3 min-w-0 overflow-hidden whitespace-nowrap">
                 <Link
                   to="/projects"
-                  className="group inline-flex items-center gap-3 text-sm uppercase tracking-[3.6px] text-[#FF0033] transition-colors"
+                  className="group inline-flex items-center gap-2 sm:gap-3 text-[10px] sm:text-sm uppercase tracking-[2px] sm:tracking-[3.6px] text-[#FF0033] transition-colors shrink-0"
                 >
                   <span className="text-[#FF0033] transition-transform group-hover:-translate-x-1">
                     <ProjectArrow />
                   </span>
                   Back to Work
                 </Link>
-                <span className="text-[#FF0033]">/</span>
-                <span className="text-sm text-[#FF6467] uppercase tracking-[3.6px]">
+                <span className="text-[#FF0033] shrink-0">/</span>
+                <span className="text-[10px] sm:text-sm text-[#FF6467] uppercase tracking-[2px] sm:tracking-[3.6px] truncate min-w-0">
                   {project.title}
                 </span>
               </div>
@@ -156,7 +156,7 @@ const ProjectDetail = () => {
                 <p className="text-lg md:text-xl text-white/60 max-w-2xl leading-relaxed">
                   {project.description}
                 </p>
-                <div className="px-4 py-2 rounded-full border-[#6C061A] border-[3px] text-xs font-bold uppercase tracking-widest bg-[#ffffff08]">
+                <div className="self-start md:self-auto w-fit shrink-0 whitespace-nowrap px-4 py-2 rounded-full border-[#6C061A] border-[3px] text-xs font-bold uppercase tracking-widest bg-[#ffffff08]">
                   Case Study
                 </div>
               </div>

@@ -8,6 +8,7 @@ import clickSound from "../assets/sounds/click.wav";
 import RedRoadMap from "../assets/svgs/RedRoadMap";
 import Character from "../assets/images/charcter-2.png";
 import { motion } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -18,16 +19,18 @@ const itemVariants = {
   },
 };
 
-const NavMenuItem = ({ title, link, onClose }) => {
+const NavMenuItem = ({ title, link, onClose, onNavigate }) => {
   const { start, stop, click } = useScrambleText(title, {
     hoverSound,
     clickSound,
     volume: 0.45,
   });
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    e.preventDefault();
     click();
     onClose?.();
+    onNavigate?.(link);
   };
 
   return (
@@ -36,7 +39,7 @@ const NavMenuItem = ({ title, link, onClose }) => {
       className="w-full flex items-center justify-center text-2xl lg:text-3xl px-6 py-3 lg:py-4 text-center relative"
     >
       <a
-        href={link}
+        href={`/${link}`}
         onMouseEnter={start}
         onMouseLeave={stop}
         onClick={handleClick}
@@ -62,6 +65,20 @@ const containerVariants = {
 };
 
 const NavMenu = ({ onClose }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // On the home page scroll straight to the section; elsewhere go home with the hash and
+  // let ScrollToTop bring the section into view once the page has rendered.
+  const goTo = (hash) => {
+    if (location.pathname === "/") {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState(null, "", `/${hash}`);
+    } else {
+      navigate(`/${hash}`);
+    }
+  };
+
   const navs = [
     { title: "HOME", link: "#home" },
     { title: "ABOUT ME", link: "#about" },
@@ -113,6 +130,7 @@ const NavMenu = ({ onClose }) => {
                 title={nav.title}
                 link={nav.link}
                 onClose={onClose}
+                onNavigate={goTo}
               />
             ))}
           </motion.div>

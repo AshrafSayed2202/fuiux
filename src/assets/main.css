@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* Apply hover styles on touch devices too (a tap acts as hover), instead of only where a
+   pointer can hover; Tailwind v4 otherwise gates every hover: variant behind @media (hover: hover). */
+@custom-variant hover (&:hover);
 @theme {
     --font-orbitron: "Orbitron", sans-serif;
 }

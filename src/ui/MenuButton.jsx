@@ -1,19 +1,16 @@
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import MenuBtn1 from "../assets/svgs/MenuBtn1";
 import MenuBtn2 from "../assets/svgs/MenuBtn2";
 import { useScrambleText } from "../hooks/useScrambleText";
 import hoverSound from "../assets/sounds/hover.wav";
 import clickSound from "../assets/sounds/click.wav";
 import ContactModal from "../components/ContactModal";
-import NavMenu from "../components/NavMenu";
 
-const MenuButton = ({ open }) => {
+// The nav owns the menu (one instance, one open state); this button only reports clicks
+// through `open` and mirrors the state it is given through `active`.
+const MenuButton = ({ open, active = false }) => {
   const [contactOpen, setContactOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  // Visual state is driven only by our own menuOpen
-  const isActive = menuOpen;
+  const isActive = active;
 
   const { text, start, stop, click } = useScrambleText("Hire me", {
     hoverSound,
@@ -29,12 +26,7 @@ const MenuButton = ({ open }) => {
 
   const handleBurgerClick = () => {
     click();
-    setMenuOpen((prev) => !prev);
     open?.();
-  };
-
-  const handleMenuClose = () => {
-    setMenuOpen(false);
   };
 
   return (
@@ -92,21 +84,6 @@ const MenuButton = ({ open }) => {
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            key="nav-menu"
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "spring", stiffness: 260, damping: 28, mass: 0.8 }}
-            className="fixed inset-0 z-50"
-          >
-            <NavMenu onClose={handleMenuClose} />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <ContactModal
         isOpen={contactOpen}
