@@ -20,7 +20,7 @@ const AboutSection = () => {
                 transition={{ duration: 0.7, ease: "easeOut" }}
                 viewport={{ once: true, amount: 0.1 }}
               >
-                <h1 className="text-[38px] sm:text-6xl lg:text-[80px] font-extrabold text-white leading-[100%] tracking-[-0.8px] lg:tracking-[-1.6px]">
+                <h1 className="text-[40px] sm:text-6xl lg:text-[80px] font-extrabold text-white leading-[125%] lg:leading-[100%] tracking-[-1.6px]">
                   Crafting digital <br />
                   <span className="neon-text">Stories</span> That <br />
                   move people.
@@ -43,21 +43,21 @@ const AboutSection = () => {
                 viewport={{ once: true, amount: 0.1 }}
               >
                 <div className="flex flex-col gap-5 lg:gap-7">
-                  <h2 className="text-[28px] lg:text-[32px] font-bold text-[#ffffffcc] leading-[150%]">
+                  <h2 className="text-[32px] font-bold text-[#ffffffcc] leading-[150%]">
                     I'm <span className="text-[#F03]">Fawzi Sayed</span>
                   </h2>
-                  <p className="text-[14px] lg:text-[18px] font-normal text-[#ffffff59]">
+                  <p className="text-[18px] font-normal text-[#ffffff59]">
                     A <span className="text-[#00E5E6]">Ui/Ux designer</span> and <span className="text-[#00E5E6]">product designer</span>. Passionate about <br className="hidden lg:block" />
                     crafting unforgettable experiences and providing <br className="hidden lg:block" />
                     companies with innovative, user-centric solutions for <br className="hidden lg:block" />
                     nearly a decade.
                   </p>
-                  <p className="text-[14px] lg:text-[18px] font-normal text-[#ffffff59]">
+                  <p className="text-[18px] font-normal text-[#ffffff59]">
                     Collaborating with global brands and agencies, I specialize <br className="hidden lg:block" />
                     in designing and developing websites and applications that <br className="hidden lg:block" />
                     prioritize interaction, motion, and visual engagement.
                   </p>
-                  <p className="text-[14px] lg:text-[18px] font-normal text-[#ffffff59]">
+                  <p className="text-[18px] font-normal text-[#ffffff59]">
                     My work has been on converting complex issues into <br className="hidden lg:block" />
                     straightforward, user-friendly solutions that were <br className="hidden lg:block" />
                     accessible to everyone.
@@ -76,6 +76,7 @@ const AboutSection = () => {
                   <AboutTag text="Typography" />
                   <AboutTag text="Visual Strategy" />
                   <AboutTag text="Art Direction" />
+                  <div className="hidden lg:block grow-[999] basis-0" aria-hidden="true" />
                 </div>
               </motion.div>
             </div>

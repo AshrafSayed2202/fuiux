@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Header from "../ui/Header";
 import LetsChar1 from "../assets/images/letsChar1.png";
@@ -11,8 +11,33 @@ import hoverSound from "../assets/sounds/hover.wav";
 import clickSound from "../assets/sounds/click.wav";
 import ContactModal from "../components/ContactModal";
 
+// Footer slide-over (all breakpoints): the section pins with its bottom edge on the viewport
+// bottom while the footer, pulled up by 100vh, slides over it. The container is sized to the
+// section height plus a pause plus one viewport of overlap travel.
+const FOOTER_OVERLAP_PAUSE = 300;
+
 const LetsSection = () => {
   const [contactOpen, setContactOpen] = useState(false);
+  const stageRef = useRef(null);
+  const [stage, setStage] = useState({ height: undefined, top: 0 });
+
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const update = () => {
+      const h = el.offsetHeight;
+      const vh = window.innerHeight;
+      setStage({ height: h + vh + FOOTER_OVERLAP_PAUSE, top: Math.min(0, vh - h) });
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
   const { text, start, stop, click } = useScrambleText("Get in touch", {
     hoverSound,
@@ -27,8 +52,12 @@ const LetsSection = () => {
 
   return (
     <>
-      <div className="relative lg:h-[calc(200vh+300px)]" id="contact">
-        <div className="relative lg:sticky top-0 min-h-screen lg:h-screen z-10 bg-[#0A0A0A] overflow-hidden flex flex-col lg:flex-row lg:items-center lg:justify-center">
+      <div className="relative" id="contact" style={{ height: stage.height }}>
+        <div
+          ref={stageRef}
+          className="sticky min-h-screen lg:h-screen z-10 bg-[#0A0A0A] overflow-hidden flex flex-col lg:flex-row lg:items-center lg:justify-center"
+          style={{ top: stage.top }}
+        >
           <img
             src={LetsBg1}
             alt="lets-bg-1"

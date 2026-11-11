@@ -10,6 +10,9 @@ const Nav = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  // small screens: the solid nav background only shows once the hero section is scrolled past
+  // (pages without a hero are solid from the top)
+  const [pastHero, setPastHero] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(
     typeof window !== "undefined" ? window.innerWidth >= 768 : true
   );
@@ -20,6 +23,8 @@ const Nav = () => {
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > scrollThreshold);
+      const hero = document.getElementById("home");
+      setPastHero(!hero || hero.getBoundingClientRect().bottom <= 0);
     };
 
     handleScroll();
@@ -44,7 +49,7 @@ const Nav = () => {
   return (
     <>
       <nav
-        className={`max-w-screen fixed w-screen z-50 mx-auto flex items-center justify-center p-4 duration-300 ${
+        className={`max-w-screen fixed w-screen z-50 mx-auto flex items-center justify-center p-4 duration-300 ${isMenuOpen || !pastHero ? "" : "max-md:bg-[#0A0A0A]"} transition-colors ${
           applyScrollStyles ? "top-5" : "top-0"
         }`}
       >

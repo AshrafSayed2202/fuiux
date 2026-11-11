@@ -41,7 +41,7 @@
 
 /* some icons clip their content to the viewBox, which would cut the stroke */
 .neon-hover:hover svg g {
-  clip-path: none;
+  clipPath: none;
 }
 
 /* ---- every line / shape: neon stroke that draws itself ---- */
@@ -56,7 +56,7 @@
 /* ---- filled shapes (WhatsApp icon, dots): dark translucent fill fades in after the outline ---- */
 .neon-hover:hover svg path[fill] {
   fill: var(--neon-fill);
-  fill-opacity: 1;
+  fillOpacity: 1;
   animation:
     neon-draw var(--neon-draw-time) cubic-bezier(0.45, 0.05, 0.25, 1) both,
     neon-fill 0.5s ease-out calc(var(--neon-draw-time) * 0.7) both;

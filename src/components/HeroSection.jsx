@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useScroll, useTransform, useMotionValue, motion } from "framer-motion"
 import HeroBg from "../ui/HeroBg"
+import { MOBILE_CLIP } from "../ui/heroConfig"
 import NeonHover from "../ui/NeonHover"
 import HeroLogo from "../assets/svgs/HeroLogo"
 import WhatsAppContainer from "../assets/svgs/WhatsAppContainer"
 import WhatsAppIcon from "../assets/svgs/WhatsAppIcon"
 import SmallMask from "../assets/svgs/SmallMask"
+import FingerIcon from "../assets/svgs/FingerIcon"
+import clickSound from "../assets/sounds/click.wav"
 
 const WHATSAPP_NUMBER = "201143637341"
 const WHATSAPP_MESSAGE = "Hi! I'd like to talk about a project."
@@ -14,8 +17,8 @@ const whatsappUrl =
     (WHATSAPP_MESSAGE ? `?text=${encodeURIComponent(WHATSAPP_MESSAGE)}` : "")
 
 const MOBILE_QUERY = "(max-width: 639px)"
-const MOBILE_CROP_TOP = 33
-const MOBILE_CROP_BOTTOM = 31
+const MOBILE_CROP_TOP = MOBILE_CLIP.top * 100
+const MOBILE_CROP_BOTTOM = MOBILE_CLIP.bottom * 100
 const MOBILE_CARD_SCALE = 0.76
 
 const useIsMobile = () => {
@@ -35,8 +38,49 @@ const useIsMobile = () => {
     return isMobile
 }
 
+// Small screens: lets the user freeze page scrolling so swiping the hero drives the
+// reveal effect instead of scrolling. Overflow hidden covers most browsers; the
+// touchmove guard (scoped to the hero) covers iOS Safari, which ignores overflow on body.
+const useScrollLock = (locked, containerRef) => {
+    useEffect(() => {
+        if (!locked) return
+        const html = document.documentElement
+        const body = document.body
+        const prevHtml = html.style.overflow
+        const prevBody = body.style.overflow
+        html.style.overflow = "hidden"
+        body.style.overflow = "hidden"
+
+        const container = containerRef.current
+        const preventTouchScroll = (e) => {
+            if (e.cancelable && container && container.contains(e.target)) e.preventDefault()
+        }
+        document.addEventListener("touchmove", preventTouchScroll, { passive: false })
+
+        return () => {
+            html.style.overflow = prevHtml
+            body.style.overflow = prevBody
+            document.removeEventListener("touchmove", preventTouchScroll)
+        }
+    }, [locked, containerRef])
+}
+
 const HeroSection = () => {
     const isMobile = useIsMobile()
+    const heroRef = useRef(null)
+    const [scrollLocked, setScrollLocked] = useState(false)
+    const lockedMV = useMotionValue(0)
+    useScrollLock(scrollLocked, heroRef)
+
+    const toggleScrollLock = () => {
+        const audio = new Audio(clickSound)
+        audio.volume = 0.45
+        audio.play().catch(() => { })
+        setScrollLocked((prev) => {
+            lockedMV.set(prev ? 0 : 1)
+            return !prev
+        })
+    }
 
     const { scrollYProgress } = useScroll({
         offset: ["start start", "end end"]
@@ -56,7 +100,7 @@ const HeroSection = () => {
     )
     const clipMobile = useTransform(
         scrollYProgress,
-        [0, 0.2, 1],
+        [0, MOBILE_CLIP.end, 1],
         [
             "inset(0% 0% 0% 0%)",
             `inset(${MOBILE_CROP_TOP}% 0% ${MOBILE_CROP_BOTTOM}% 0%)`,
@@ -66,17 +110,37 @@ const HeroSection = () => {
 
     const textOpacity = useTransform(scrollYProgress, [0, 0.2, 1], [1, 0, 0])
     const panelPointerEvents = useTransform(textOpacity, (v) => (v > 0.05 ? "auto" : "none"))
+    // the lock button fades out with the hero text, but stays visible while locked
+    const lockBtnOpacity = useTransform([textOpacity, lockedMV], ([t, l]) => Math.max(t, l))
+    const lockBtnPointerEvents = useTransform(lockBtnOpacity, (v) => (v > 0.05 ? "auto" : "none"))
     const maskHover = useMotionValue(0)
 
     const logoOpacity = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.38], [0, 0, 1, 1])
-    const logoScale = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.40], [2.5, 1, 1, 0.8])
+    // phones keep the logo at its full 209px size in the titles stage (Figma mobile frame)
+    const logoScale = useTransform(scrollYProgress, [0, 0.18, 0.30, 0.40], [2.5, 1, 1, isMobile ? 1 : 0.8])
 
     const overlayOpacity = useTransform(scrollYProgress, [0, 0.2, 1], [0, 0.3, 0.3])
     const mouseEnabled = useTransform(scrollYProgress, [0, 0.2, 1], [1, 0, 0])
 
     return (
-        <div className="h-[700vh]" id="home">
+        <div className="h-[700vh]" id="home" ref={heroRef}>
             <div className="w-full sticky top-0 z-10 flex items-center justify-center overflow-hidden bg-zinc-950">
+                <motion.button
+                    type="button"
+                    onClick={toggleScrollLock}
+                    aria-pressed={scrollLocked}
+                    aria-label={scrollLocked ? "Unlock scrolling" : "Lock scrolling to play with the background"}
+                    title={scrollLocked ? "Unlock scrolling" : "Lock scrolling"}
+                    className={`absolute z-50 bottom-18 right-4 sm:hidden size-11 rounded-lg border flex items-center justify-center cursor-pointer select-none backdrop-blur-[6px] duration-300 ease-out ${scrollLocked
+                        ? "bg-[#FF0033] border-[#FF0033] text-white shadow-[0_0_18px_#FF003380]"
+                        : "bg-[#46080933] border-[#E7000B4D] text-[#FF6467E5]"
+                        }`}
+                    style={{ opacity: lockBtnOpacity, pointerEvents: lockBtnPointerEvents }}
+                    whileTap={{ scale: 0.92 }}
+                >
+                    <FingerIcon locked={scrollLocked} />
+                </motion.button>
+
                 <motion.div
                     className="absolute z-50 bottom-[2%] left-[8%] sm:left-[12%] w-24 sm:w-30 h-56 sm:h-65 tracking-[4.8px] text-[11px] sm:text-[12px] select-none uppercase text-[#ffffff26] hidden sm:block"
                     style={{ opacity: textOpacity, pointerEvents: panelPointerEvents }}
@@ -116,7 +180,7 @@ const HeroSection = () => {
                 </motion.div>
 
                 <motion.div
-                    className="absolute z-50 top-[6%] sm:top-1/10 left-1/2 -translate-x-1/2 select-none pointer-events-none scale-[0.65] sm:scale-100"
+                    className="absolute z-50 top-24 sm:top-1/10 left-1/2 -translate-x-1/2 select-none pointer-events-none"
                     style={{ opacity: logoOpacity, scale: logoScale }}
                 >
                     <HeroLogo />
@@ -170,7 +234,12 @@ const HeroSection = () => {
                         <div className="absolute inset-0 bg-[#E7000B] mix-blend-multiply" />
                     </motion.div>
 
-                    <HeroBg mouseEnabled={mouseEnabled} scrollYProgress={scrollYProgress} maskHover={maskHover} />
+                    <HeroBg
+                        mouseEnabled={mouseEnabled}
+                        scrollYProgress={scrollYProgress}
+                        maskHover={maskHover}
+                        touchLocked={scrollLocked}
+                    />
                 </motion.div>
             </div>
         </div>

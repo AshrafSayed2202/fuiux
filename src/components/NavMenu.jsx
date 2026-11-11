@@ -33,7 +33,7 @@ const NavMenuItem = ({ title, link, onClose }) => {
   return (
     <motion.div
       variants={itemVariants}
-      className="w-full flex items-center justify-center text-3xl px-6 py-4 text-center relative"
+      className="w-full flex items-center justify-center text-2xl lg:text-3xl px-6 py-3 lg:py-4 text-center relative"
     >
       <a
         href={link}
@@ -102,7 +102,7 @@ const NavMenu = ({ onClose }) => {
       <div className="relative w-full h-full gap-6.25 pt-20 pb-15">
         <div className="h-full relative z-2">
           <motion.div
-            className="w-1/3 flex flex-col h-full gap-4 items-center justify-end pb-7"
+            className="w-full lg:w-1/3 flex flex-col h-full gap-2 lg:gap-4 items-center justify-center lg:justify-end pb-7"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -118,7 +118,7 @@ const NavMenu = ({ onClose }) => {
           </motion.div>
         </div>
         <motion.div
-          className="absolute top-0 user-select-none pointer-events-none z-1"
+          className="absolute top-0 user-select-none pointer-events-none z-1 hidden lg:block"
           initial={{ opacity: 0, x: -80 ,rotateY:180 }}
           animate={{ opacity: 1, x: 0 ,rotateY:180 }}
           transition={{ duration: 0.9, delay: 1.1, ease: "easeOut" }}
@@ -128,7 +128,7 @@ const NavMenu = ({ onClose }) => {
         <motion.img
           src={Character}
           alt=""
-          className="absolute bottom-0 right-0 translate-x-1/5 h-full w-full object-cover pointer-events-none z-2"
+          className="absolute bottom-0 right-0 translate-x-1/5 h-full w-full object-cover pointer-events-none z-2 hidden lg:block"
           initial={{ opacity: 1, x: 120 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.1, delay: 1.3, ease: "easeOut" }}

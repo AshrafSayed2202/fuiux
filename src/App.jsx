@@ -13,6 +13,7 @@ import ProjectsPage from "./components/ProjectsPage.jsx"
 import ProjectDetail from "./components/ProjectDetail.jsx"
 import ScrollToTop from "./components/ScrollToTop.jsx"
 import NotFound from "./components/NotFound.jsx"
+import Loading from "./components/Loading.jsx"
 
 function HomePage() {
   return (
@@ -33,6 +34,7 @@ function HomePage() {
 function App() {
   return (
     <BrowserRouter>
+      <Loading />
       <ScrollToTop />
       <main className="relative w-full">
         <Nav />

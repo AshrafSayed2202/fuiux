@@ -12,7 +12,6 @@ import { useScrambleText } from "../hooks/useScrambleText"
 import hoverSound from "../assets/sounds/hover.wav"
 import clickSound from "../assets/sounds/click.wav"
 import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
-import pricingHoverSound from "../assets/sounds/pricing-hover.wav"
 
 const CARD_DESIGN_WIDTH = 466
 const DESKTOP_QUERY = "(min-width: 1024px)"
@@ -176,8 +175,9 @@ const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
   const pricingHoverRef = useRef(null)
 
   useEffect(() => {
-    pricingHoverRef.current = new Audio(pricingHoverSound)
-    pricingHoverRef.current.volume = 0.3
+    // same clip as the "Get Started" button hover
+    pricingHoverRef.current = new Audio(hoverSound)
+    pricingHoverRef.current.volume = 0.45
     pricingHoverRef.current.preload = "auto"
   }, [])
 

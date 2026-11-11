@@ -4,6 +4,8 @@ import { useTransform } from "framer-motion";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { trackAsset } from "../lib/assetLoading";
+import { MOBILE_CLIP } from "./heroConfig";
 
 import personDiffuse from "../assets/images/person-diffuse.png";
 import alphaMap from "../assets/images/AlphaMas.png";
@@ -21,6 +23,17 @@ const SWEEP_MS = 1100;
 
 const PORTRAIT_MAX_ASPECT = 0.85;
 const PORTRAIT_LIFT = 0.35;
+// Phones (< 640px): character is enlarged and sits almost on the screen bottom so the
+// face fills the hero like the Figma mobile frame (eyes ~57% down, hairline ~38%).
+const MOBILE_SCALE_BOOST = 1.25;
+const MOBILE_LIFT = 0.04;
+// Mobile card clip, shared with HeroSection's clipMobile keyframes: insets of the visible
+// band as fractions of the stage height, fully applied at scroll progress `end`.
+// Local (model-unit) heights of the chin and the hairline above the character group origin,
+// used to keep the whole face inside the card's visible band while it shrinks.
+const CHIN_LOCAL_Y = -0.93;
+const HAIR_LOCAL_Y = 1.1;
+const FACE_MARGIN = 0.04;
 const MOBILE_CARD_CENTER_Y = 0.1;
 const MOBILE_FACE_LOCAL_Y = 0;
 const Z_PTS = [
@@ -62,7 +75,15 @@ const AUTO_LOOK = {
 };
 
 const mixv = (a, b, m) => a + (b - a) * m;
+// Reveal effect (radius + trail length) is scaled down on small screens.
+const MOBILE_EFFECT_SCALE = 0.55;
+const MOBILE_QUERY = "(max-width: 639px)";
 const WIPE_MS = 900;
+// Time constants (seconds) for the reveal trail strength: how fast it builds while the
+// pointer moves and how slowly it fades once the pointer stops. Frame-rate independent.
+const PACE_RISE_S = 0.12;
+const PACE_FALL_S = 0.7;
+const PACE_IDLE_S = 1.2;
 
 function getResponsiveCharacterScale(aspect) {
   if (aspect >= PORTRAIT_MAX_ASPECT) return 1;
@@ -226,7 +247,7 @@ const bgFragment = `
   }
 `;
 
-export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
+export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover, touchLocked = false }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const [isMouseActive, setIsMouseActive] = useState(true);
@@ -239,7 +260,12 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
   }, [mouseEnabled]);
 
   const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
-  const characterScale = useTransform(scrollYProgress, [0, 0.3], [1, isMobile ? 0.6 : 1.25]);
+  // the mobile end value is divided by the boost so the scrolled-down card keeps its size
+  const characterScale = useTransform(
+    scrollYProgress,
+    [0, 0.3],
+    [1, isMobile ? 0.6 / MOBILE_SCALE_BOOST : 1.25]
+  );
   const scaleRef = useRef(1);
   const respScaleRef = useRef(1);
 
@@ -316,6 +342,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
     let wipe = 0;
     let lastFrame = 0;
     let aspect = 1;
+    let effectScale = 1;
     let ready = false;
     let startTime = null;
 
@@ -583,7 +610,9 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
       camera.updateProjectionMatrix();
       aspect = camera.aspect;
       revealUniforms.uAspect.value = aspect;
-      respScaleRef.current = getResponsiveCharacterScale(aspect);
+      const mobile = window.matchMedia(MOBILE_QUERY).matches;
+      respScaleRef.current = getResponsiveCharacterScale(aspect) * (mobile ? MOBILE_SCALE_BOOST : 1);
+      effectScale = mobile ? MOBILE_EFFECT_SCALE : 1;
       fitBackgrounds();
     }
 
@@ -604,12 +633,27 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
 
       const s = scaleRef.current * respScaleRef.current;
       characterGroup.scale.setScalar(s);
-      const portraitShift = aspect < PORTRAIT_MAX_ASPECT ? PORTRAIT_LIFT * s : 0;
+      const mobile = window.matchMedia(MOBILE_QUERY).matches;
+      const lift = mobile ? MOBILE_LIFT : PORTRAIT_LIFT;
+      const portraitShift = aspect < PORTRAIT_MAX_ASPECT ? lift * s : 0;
       const bottomY = screenBottomY() - BOTTOM_BLEED - characterBottom * s + portraitShift;
-      if (window.matchMedia("(max-width: 639px)").matches) {
-        const p = Math.min(1, Math.max(0, scrollYProgress.get() / 0.3));
+      if (mobile) {
+        const progress = scrollYProgress.get();
+        const p = Math.min(1, Math.max(0, progress / 0.3));
         const centeredY = MOBILE_CARD_CENTER_Y - MOBILE_FACE_LOCAL_Y * s;
-        characterGroup.position.y = bottomY + (centeredY - bottomY) * p;
+        let y = bottomY + (centeredY - bottomY) * p;
+
+        // The card's visible band (in world units) at this moment of the clip animation.
+        const clipT = Math.min(1, Math.max(0, progress / MOBILE_CLIP.end));
+        const worldH = 2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+        const bandTop = camera.position.y + worldH / 2 - MOBILE_CLIP.top * clipT * worldH;
+        const bandBottom = camera.position.y - worldH / 2 + MOBILE_CLIP.bottom * clipT * worldH;
+        // Keep the chin above the band's bottom edge and the hairline below its top edge.
+        const minY = bandBottom + FACE_MARGIN - CHIN_LOCAL_Y * s;
+        const maxY = bandTop - FACE_MARGIN - HAIR_LOCAL_Y * s;
+        y = minY <= maxY ? Math.min(Math.max(y, minY), maxY) : (minY + maxY) / 2;
+
+        characterGroup.position.y = y;
       } else {
         characterGroup.position.y = bottomY;
       }
@@ -639,30 +683,37 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
         if (auto.mix < 0.001) auto.mix = 0;
         const m = auto.mix;
 
-        revealUniforms.uRadius.value = mixv(HOVER_LOOK.radius, AUTO_LOOK.radius, m);
+        revealUniforms.uRadius.value =
+          mixv(HOVER_LOOK.radius, AUTO_LOOK.radius, m) * effectScale;
         revealUniforms.uLength.value =
-          mixv(HOVER_LOOK.trail, AUTO_LOOK.trail, m) / (SAMPLES - 1);
+          (mixv(HOVER_LOOK.trail, AUTO_LOOK.trail, m) * effectScale) / (SAMPLES - 1);
         revealUniforms.uTaper.value = mixv(HOVER_LOOK.taper, AUTO_LOOK.taper, m);
         const follow = mixv(HOVER_LOOK.follow, AUTO_LOOK.follow, m);
 
         smoothed.x += (pointer.x - smoothed.x) * follow;
         smoothed.y += (pointer.y - smoothed.y) * follow;
 
+        const dt = lastFrame ? Math.min((time - lastFrame) / 1000, 0.05) : 0;
+        lastFrame = time;
+
         const step = Math.hypot(smoothed.x - trail[0].x, smoothed.y - trail[0].y);
         const target = Math.min(1, step / 0.035);
-        pace += (target - pace) * (target > pace ? 0.14 : 0.09);
+        const paceTau = target > pace ? PACE_RISE_S : PACE_FALL_S;
+        pace += (target - pace) * (1 - Math.exp(-dt / paceTau));
 
-        if (step < 0.002) pace *= 0.92;
+        if (step < 0.002) pace *= Math.exp(-dt / PACE_IDLE_S);
 
-        const oldest = trail.pop();
-        oldest.set(smoothed.x, smoothed.y);
-        trail.unshift(oldest);
+        // Only record a trail sample while the point is moving: a stopped pointer leaves the
+        // trail shape in place so it fades out, instead of collapsing into a dot first.
+        if (step > 0.0015) {
+          const oldest = trail.pop();
+          oldest.set(smoothed.x, smoothed.y);
+          trail.unshift(oldest);
+        }
 
         revealUniforms.uPace.value = pace;
         revealUniforms.uTime.value = t;
 
-        const dt = lastFrame ? Math.min((time - lastFrame) / 1000, 0.05) : 0;
-        lastFrame = time;
         const wipeDir = isMouseActive && maskHoverRef.current > 0.5 ? 1 : -1;
         wipe = Math.min(1, Math.max(0, wipe + (wipeDir * dt) / (WIPE_MS / 1000)));
         revealUniforms.uForce.value = wipe * wipe * (3 - 2 * wipe);
@@ -690,13 +741,16 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
 
     resize();
     window.addEventListener("resize", resize);
+    // pointerdown lets a touch tap or drag start drive the effect, not only mouse hover
+    canvas.addEventListener("pointerdown", onPointer);
     canvas.addEventListener("pointermove", onPointer);
-    init();
+    trackAsset(init());
     raf = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
+      canvas.removeEventListener("pointerdown", onPointer);
       canvas.removeEventListener("pointermove", onPointer);
       renderer.dispose();
     };
@@ -707,7 +761,13 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover }) {
       ref={containerRef}
       className="relative h-full w-full overflow-hidden"
     >
-      <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
+      {/* pan-y: vertical swipes still scroll the page while horizontal ones drive the
+          effect; none (scroll locked): every touch move reaches the effect */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 block h-full w-full"
+        style={{ touchAction: touchLocked ? "none" : "pan-y" }}
+      />
     </div>
   );
 }

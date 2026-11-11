@@ -51,7 +51,7 @@ const Footer = ({ overlay = true }) => {
     { title: "CONTACT ME", link: "/#contact" }
   ]
   return (
-    <div className={`bg-[#0A0A0A] relative min-h-screen lg:h-screen overflow-hidden! z-20 ${overlay ? "lg:mt-[-100vh]" : ""}`}>
+    <div className={`bg-[#0A0A0A] relative min-h-screen lg:h-screen overflow-hidden! z-20 ${overlay ? "mt-[-100vh]" : ""}`}>
       <img src={footerBg1} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />
       <img src={footerBg2} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />
       <img src={footerBg3} alt="" className="absolute top-0 left-0 h-full w-full object-cover pointer-events-none" />

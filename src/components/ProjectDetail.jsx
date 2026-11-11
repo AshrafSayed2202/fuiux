@@ -3,10 +3,12 @@ import { useParams, useNavigate, Link } from "react-router-dom"
 import { motion, useScroll, useSpring, AnimatePresence, useMotionValueEvent } from "framer-motion"
 import { PROJECTS } from "../data/projects"
 import CardBorders from "../ui/CardBorders"
+import LetsSection from "./LetsSection"
 import Footer from "./Footer"
 import ProjectArrow from "../assets/svgs/ProjectArrow"
 import KeyResults from "../assets/svgs/KeyResults"
 import Arrow from "../assets/svgs/Arrow"
+import { useMediaQuery } from "../hooks/useMediaQuery"
 
 const ProjectDetail = () => {
   const { id } = useParams()
@@ -14,6 +16,8 @@ const ProjectDetail = () => {
   const [loadedId, setLoadedId] = useState(null)
   const loading = loadedId !== id
   const [showScrollTop, setShowScrollTop] = useState(false)
+  // phones: the key results frame is stretched to a taller box so the figures stay readable
+  const isSmallScreen = useMediaQuery("(max-width: 639px)")
 
   const project = useMemo(
     () => PROJECTS.find((p) => String(p.id) === String(id)),
@@ -226,22 +230,22 @@ const ProjectDetail = () => {
 
                   {project.keyResults?.length > 0 && (
                     <div className="my-16 w-full max-w-228.75 mx-auto">
-                      <div className="relative w-full aspect-915/390">
+                      <div className="relative w-full aspect-[915/560] sm:aspect-915/390">
                         <div className="absolute inset-0 z-[-1]">
-                          <KeyResults />
+                          <KeyResults stretch={isSmallScreen} />
                         </div>
-                        <h4 className="text-base sm:text-xl md:text-2xl font-extrabold text-white absolute left-[3%] top-[6%] sm:top-[8%]">
+                        <h4 className="text-[10px] mt-2 sm:text-xl md:text-2xl font-extrabold text-white absolute left-[3%] top-[5%] sm:top-[8%]">
                           Key Results
                         </h4>
-                        <div className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[82%] px-2 sm:px-4 md:px-0">
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:gap-6 md:gap-8 absolute top-[54%] sm:top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[86%] sm:w-[82%] px-1 sm:px-4 md:px-0">
                           {project.keyResults.map((result, i) => {
                             const parts = result.split(" ")
                             return (
                               <div key={i}>
-                                <span className="block text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-1 sm:mb-2">
+                                <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-none mb-1 sm:mb-2">
                                   {parts[0]}
                                 </span>
-                                <span className="text-[9px] sm:text-[10px] md:text-xs font-mono uppercase tracking-widest text-white/60">
+                                <span className="block text-[9px] sm:text-[10px] md:text-xs leading-tight font-mono uppercase tracking-wider sm:tracking-widest text-white/60">
                                   {parts.slice(1).join(" ")}
                                 </span>
                               </div>
@@ -366,7 +370,8 @@ const ProjectDetail = () => {
           </div>
         </section>
       </main>
-      <Footer overlay={false} />
+      <LetsSection />
+      <Footer />
 
       <AnimatePresence>
         {showScrollTop && (
