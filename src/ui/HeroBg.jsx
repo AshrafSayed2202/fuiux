@@ -83,10 +83,18 @@ const mixv = (a, b, m) => a + (b - a) * m;
 // Reveal effect (radius + trail length) is scaled down on small screens.
 const MOBILE_EFFECT_SCALE = 0.55;
 const MOBILE_QUERY = "(max-width: 639px)";
-// Render resolution. Phones have 2-3x pixel-dense screens, so rendering at 1x left the
-// canvas upscaled by the browser and the character looked blurry. Phones render at the
-// screen's density (capped at 2x to keep the reveal shader fast); larger screens stay at 1x.
-const MOBILE_MAX_PIXEL_RATIO = 2;
+// Render resolution. Phones have 2-3.5x pixel-dense screens; drawing below that leaves the
+// browser stretching the canvas, which made the character look pixelated. Phones render at
+// the screen's density up to 3x. If a phone can't hold a smooth frame rate at that density,
+// it drops to the fallback once. Larger screens stay at 1x.
+const MOBILE_MAX_PIXEL_RATIO = 3;
+const MOBILE_FALLBACK_PIXEL_RATIO = 2;
+// Frame-time check for the fallback: average over the first PERF_SAMPLE_FRAMES frames (or
+// PERF_SAMPLE_MS, whichever comes first) after the character appears; above the limit
+// (about 40 fps) the resolution is lowered.
+const PERF_SAMPLE_FRAMES = 90;
+const PERF_SAMPLE_MS = 1500;
+const PERF_SLOW_FRAME_MS = 25;
 const DESKTOP_PIXEL_RATIO = 1;
 const WIPE_MS = 900;
 // Time constants (seconds) for the reveal trail strength: how fast it builds while the
@@ -354,6 +362,8 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover, touch
     let effectScale = 1;
     let ready = false;
     let startTime = null;
+    let phoneMaxPixelRatio = MOBILE_MAX_PIXEL_RATIO;
+    const perf = { frames: 0, total: 0, last: 0, done: false };
 
     const auto = {
       active: false,
@@ -612,7 +622,7 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover, touch
       const h = canvas.clientHeight || window.innerHeight;
       const isPhone = window.matchMedia(MOBILE_QUERY).matches;
       renderer.setPixelRatio(
-        isPhone ? Math.min(window.devicePixelRatio || 1, MOBILE_MAX_PIXEL_RATIO) : DESKTOP_PIXEL_RATIO
+        isPhone ? Math.min(window.devicePixelRatio || 1, phoneMaxPixelRatio) : DESKTOP_PIXEL_RATIO
       );
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
@@ -641,8 +651,27 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover, touch
     }
 
     let raf;
+    // Once, after the character appears: if frames are slow at the phone's full density,
+    // drop to the fallback resolution.
+    function checkPerformance(time) {
+      if (perf.done || !ready) return;
+      if (perf.last) {
+        perf.total += time - perf.last;
+        perf.frames += 1;
+      }
+      perf.last = time;
+      if (perf.frames < 3 || (perf.frames < PERF_SAMPLE_FRAMES && perf.total < PERF_SAMPLE_MS)) return;
+      perf.done = true;
+      const slow = perf.total / perf.frames > PERF_SLOW_FRAME_MS;
+      if (slow && renderer.getPixelRatio() > MOBILE_FALLBACK_PIXEL_RATIO) {
+        phoneMaxPixelRatio = MOBILE_FALLBACK_PIXEL_RATIO;
+        resize();
+      }
+    }
+
     function animate(time) {
       if (!startTime) startTime = time;
+      checkPerformance(time);
       const t = (time - startTime) / 1000;
 
       const s = scaleRef.current * respScaleRef.current;

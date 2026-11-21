@@ -1,8 +1,6 @@
-import { useState } from "react"
 import { Link } from "react-router-dom"
 import NotFoundIcon from "../assets/svgs/NotFoundIcon"
 import NotFoundButtonBg from "../assets/svgs/NotFoundButtonBg"
-import ContactModal from "./ContactModal"
 import LetsBg1 from "../assets/images/LetsBg1.png"
 import LetsBg2 from "../assets/images/LetsBg2.png"
 
@@ -22,8 +20,6 @@ const MOBILE_TILES = [
 ]
 
 const NotFound = () => {
-  const [contactOpen, setContactOpen] = useState(false)
-
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center flex-col gap-12 max-lg:gap-[31px] max-lg:py-10 text-white relative overflow-hidden">
       {/* Desktop background */}
@@ -79,21 +75,18 @@ const NotFound = () => {
         Back to Home
       </Link>
 
-      {/* Mobile action (Figma "GET IN TOUCH", 250x58 cut-corner plate) */}
-      <button
-        type="button"
-        onClick={() => setContactOpen(true)}
+      {/* Mobile action (Figma 250x58 cut-corner plate) */}
+      <Link
+        to="/"
         className="lg:hidden relative z-10 w-62.5 h-14.5 cursor-pointer group"
       >
         <span className="absolute inset-0 transition-[filter] duration-300 group-hover:brightness-110 group-active:brightness-90">
           <NotFoundButtonBg />
         </span>
         <span className="absolute inset-0 flex items-center justify-center text-[14px] font-bold leading-5 tracking-[0.35px] text-white">
-          GET IN TOUCH
+          BACK TO HOME
         </span>
-      </button>
-
-      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
+      </Link>
     </div>
   )
 }

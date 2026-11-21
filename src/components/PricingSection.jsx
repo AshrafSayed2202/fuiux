@@ -9,6 +9,7 @@ import PricingBtn from "../assets/svgs/PricingBtn"
 import PricingConnector from "../assets/svgs/PricingConnector"
 import PricingBorder from "../assets/svgs/PricingBorder"
 import { useScrambleText } from "../hooks/useScrambleText"
+import ContactModal from "./ContactModal"
 import hoverSound from "../assets/sounds/hover.wav"
 import clickSound from "../assets/sounds/click.wav"
 import secondaryHoverSound from "../assets/sounds/secondary-hover.wav"
@@ -161,7 +162,7 @@ const ScaledCard = ({ designHeight, children }) => {
   )
 }
 
-const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
+const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave, onGetStarted }) => {
   const isMid = plan.featured
   const price = plan.prices[billing]
   const intervalLabel = billing === "monthly" ? "Month" : "Hour"
@@ -261,9 +262,21 @@ const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
       </ul>
       <div
         className="absolute z-3 left-2.25 bottom-12.75 scale-[0.95] cursor-pointer"
+        role="button"
+        tabIndex={0}
         onMouseEnter={start}
         onMouseLeave={stop}
-        onClick={click}
+        onClick={() => {
+          click()
+          onGetStarted()
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            click()
+            onGetStarted()
+          }
+        }}
       >
         <PricingBtn isHovered={isHovered} isMid={isMid} />
         <div
@@ -282,6 +295,7 @@ const PlanCard = ({ plan, billing, isHovered, onEnter, onLeave }) => {
 const PricingSection = () => {
   const [billing, setBilling] = useState("monthly")
   const [hoveredId, setHoveredId] = useState(null)
+  const [contactOpen, setContactOpen] = useState(false)
 
   const playSecondaryHover = () => {
     const audio = new Audio(secondaryHoverSound)
@@ -379,12 +393,15 @@ const PricingSection = () => {
                   isHovered={hoveredId === plan.id}
                   onEnter={() => setHoveredId(plan.id)}
                   onLeave={() => setHoveredId(null)}
+                  onGetStarted={() => setContactOpen(true)}
                 />
               </ScaledCard>
             </motion.div>
           ))}
         </div>
       </div>
+
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   )
 }
