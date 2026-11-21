@@ -124,14 +124,17 @@ const HeroSection = () => {
 
     return (
         <div className="h-[700vh]" id="home" ref={heroRef}>
-            <div className="w-full sticky top-0 z-10 flex items-center justify-center overflow-hidden bg-zinc-950">
+            {/* Phones: the first screen is sized to 100svh, the height with the browser's address
+                bar showing (100vh is the height with it hidden, which pushed the bottom labels
+                off-screen). The fixed nav overlays the hero, so it is counted inside this height. */}
+            <div className="w-full sticky top-0 z-10 flex items-center justify-center overflow-hidden bg-zinc-950 max-sm:h-svh">
                 <motion.button
                     type="button"
                     onClick={toggleScrollLock}
                     aria-pressed={scrollLocked}
                     aria-label={scrollLocked ? "Unlock scrolling" : "Lock scrolling to play with the background"}
                     title={scrollLocked ? "Unlock scrolling" : "Lock scrolling"}
-                    className={`absolute z-50 bottom-18 right-4 sm:hidden size-11 rounded-lg border flex items-center justify-center cursor-pointer select-none backdrop-blur-[6px] duration-300 ease-out ${scrollLocked
+                    className={`absolute z-50 bottom-[calc(72px+env(safe-area-inset-bottom))] right-4 sm:hidden size-11 rounded-lg border flex items-center justify-center cursor-pointer select-none backdrop-blur-[6px] duration-300 ease-out ${scrollLocked
                         ? "bg-[#FF0033] border-[#FF0033] text-white shadow-[0_0_18px_#FF003380]"
                         : "bg-[#46080933] border-[#E7000B4D] text-[#FF6467E5]"
                         }`}
@@ -187,14 +190,14 @@ const HeroSection = () => {
                 </motion.div>
 
                 <motion.div
-                    className="absolute z-50 bottom-4 sm:bottom-0 left-1/2 -translate-y-1/2 -translate-x-1/2 text-center select-none uppercase flex flex-col items-center gap-2 justify-center pointer-events-none"
+                    className="absolute z-50 max-sm:bottom-[calc(31px+env(safe-area-inset-bottom))] sm:bottom-0 left-1/2 sm:-translate-y-1/2 -translate-x-1/2 text-center select-none uppercase flex flex-col items-center gap-2 justify-center pointer-events-none"
                     style={{ opacity: textOpacity }}
                 >
                     <span className="bold z-50 relative text-white tracking-[3px] sm:tracking-[4.8px] text-[10px] sm:text-[12px] opacity-20">
                         Scroll
                     </span>
                     <span className="h-6 sm:h-12 w-px block bg-linear-to-b from-[#ffffff33] to-transparent" />
-                    <div className="absolute flex items-center gap-2 justify-center py-1 sm:py-2 px-2.5 sm:px-4 bg-[#46080933] border-[#E7000B4D] border rounded-lg -bottom-2 sm:-bottom-4">
+                    <div className="sm:absolute flex items-center gap-2 justify-center py-1 sm:py-2 px-2.5 sm:px-4 bg-[#46080933] border-[#E7000B4D] border rounded-lg max-sm:-mt-[25px] sm:-bottom-4">
                         <span className="size-1.5 sm:size-2 min-w-2 rounded-full bg-[#FB2C36]" />
                         <span className="text-[#FF6467E5] z-50 relative tracking-[2.5px] sm:tracking-[4.8px] text-[10px] sm:text-[12px] uppercase block text-nowrap">
                             Available for Projects
@@ -221,7 +224,7 @@ const HeroSection = () => {
                 </div>
 
                 <motion.div
-                    className="relative h-screen w-full flex items-center justify-center z-10"
+                    className="relative h-screen max-sm:h-svh w-full flex items-center justify-center z-10"
                     style={{
                         scale: isMobile ? scaleMobile : scaleDesktop,
                         clipPath: isMobile ? clipMobile : clipDesktop

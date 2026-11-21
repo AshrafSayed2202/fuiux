@@ -31,6 +31,12 @@ const PORTRAIT_LIFT = 0.35;
 // Phones (< 640px): character is enlarged and sits almost on the screen bottom so the
 // face fills the hero like the Figma mobile frame (eyes ~57% down, hairline ~38%).
 const MOBILE_SCALE_BOOST = 1.25;
+// Phones: the portrait is anchored to the screen bottom and its height grows with the screen
+// width (about 1.35x the width, from the bottom edge to the top of the hair). On short screens
+// the empty space above it shrinks first; only when the hair would reach the fixed header
+// (74px tall, plus a 16px gap) is the portrait, with the helmet, scaled down to fit.
+const MOBILE_PORTRAIT_HEIGHT_PER_WIDTH = 1.35;
+const MOBILE_TOP_RESERVE_PX = 90;
 const MOBILE_LIFT = 0.04;
 // Mobile card clip, shared with HeroSection's clipMobile keyframes: insets of the visible
 // band as fractions of the stage height, fully applied at scroll progress `end`.
@@ -635,7 +641,11 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover, touch
       aspect = camera.aspect;
       revealUniforms.uAspect.value = aspect;
       const mobile = window.matchMedia(MOBILE_QUERY).matches;
-      respScaleRef.current = getResponsiveCharacterScale(aspect) * (mobile ? MOBILE_SCALE_BOOST : 1);
+      const heightFit = mobile
+        ? Math.min(1, (h - MOBILE_TOP_RESERVE_PX) / (w * MOBILE_PORTRAIT_HEIGHT_PER_WIDTH))
+        : 1;
+      respScaleRef.current =
+        getResponsiveCharacterScale(aspect) * (mobile ? MOBILE_SCALE_BOOST * heightFit : 1);
       effectScale = mobile ? MOBILE_EFFECT_SCALE : 1;
       fitBackgrounds();
     }
