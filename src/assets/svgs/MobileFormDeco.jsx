@@ -1,9 +1,9 @@
-// Top-right red accent of the mobile contact form (Figma "Vector 37").
+// Top-right red accent of the mobile contact form (Figma "Vector 37", 94.1 x 18.4).
 const MobileFormDeco = () => {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="127.083" height="34.1667" viewBox="0 0 127.083 34.1667" fill="none">
-            <path d="M31.25 10.8333H0L10.4167 0H20.8333L31.25 10.8333Z" fill="#FF0033" />
-            <path d="M35.4167 14.5833H90.4167L106.25 0.416667H127.083V33.75L92.9167 34.1667L81.6667 21.25H42.0833L35.4167 14.5833Z" fill="#FF0033" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="95" height="19" viewBox="0 0 95 19" fill="none">
+            <path d="M16.8379 5.83714H0L5.61263 0H11.2253L16.8379 5.83714Z" fill="#FF0033" />
+            <path d="M19.083 7.85769H58.1469L66.6781 0.224505H94.0677V18.1849L59.4939 18.4094L53.4323 11.4498H22.675L19.083 7.85769Z" fill="#FF0033" />
         </svg>
     )
 }

@@ -25,13 +25,16 @@ import { useMediaQuery } from "../hooks/useMediaQuery"
 // The desktop SVG composition is a fixed 825x614 box; below this the mobile composition is used.
 const DESKTOP_LAYOUT_QUERY = "(min-width: 900px) and (min-height: 660px)"
 
-// Mobile composition (Figma "Form" frame) is a fixed 370.8x570 box, scaled down when the
+// Mobile composition (Figma "Form" frame) is a fixed 370.4x530 box, scaled down when the
 // viewport is smaller than that plus a margin.
-const MOBILE_W = 370.838
-const MOBILE_H = 570
+const MOBILE_W = 370.436
+const MOBILE_H = 530
 const MOBILE_MARGIN = 10
 
 const EMPTY_FORM = { firstName: "", lastName: "", email: "", phone: "", message: "" }
+
+// How long a success or error toast stays on screen.
+const TOAST_DURATION_MS = 5000
 
 const useFitScale = (width, height, margin) => {
   const compute = () =>
@@ -96,7 +99,7 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [toast, setToast] = useState({ open: false, type: "success", title: "", message: "" })
+  const [toast, setToast] = useState({ open: false, id: 0, type: "success", title: "", message: "" })
   const isDesktopLayout = useMediaQuery(DESKTOP_LAYOUT_QUERY)
   const mobileScale = useFitScale(MOBILE_W, MOBILE_H, MOBILE_MARGIN)
 
@@ -109,7 +112,7 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
         setForm(EMPTY_FORM)
         setErrors({})
         setIsSubmitting(false)
-        setToast({ open: false, type: "success", title: "", message: "" })
+        // The toast is left alone so a success toast keeps its full duration after the modal closes.
       }, 300)
       return () => clearTimeout(t)
     }
@@ -122,9 +125,10 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
     if (!toast.open) return
     const t = setTimeout(() => {
       setToast((prev) => ({ ...prev, open: false }))
-    }, 4000)
+    }, TOAST_DURATION_MS)
     return () => clearTimeout(t)
-  }, [toast.open])
+    // Keyed on the toast id so a toast shown again while one is open restarts the timer.
+  }, [toast.open, toast.id])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -143,7 +147,7 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
   }
 
   const showToast = (type, title, message) => {
-    setToast({ open: true, type, title, message })
+    setToast({ open: true, id: Date.now(), type, title, message })
   }
 
   const handleSubmit = async (e) => {
@@ -257,7 +261,7 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
     </motion.div>
   )
 
-  // Positions below are the Figma "Form" frame coordinates (px inside the 370.8x570 box).
+  // Positions below are the Figma "Form" frame coordinates (px inside the 370.4x530 box).
   const mobilePanel = (
     <motion.div
       className="relative"
@@ -269,33 +273,34 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
         className="absolute left-0 top-0 origin-top-left"
         style={{ width: MOBILE_W, height: MOBILE_H, transform: `scale(${mobileScale})` }}
       >
-        <motion.div className="absolute left-0 top-0" {...piece(0)}>
-          <MobileFormFrame />
-        </motion.div>
-        <motion.div className="absolute" style={{ left: 33.75, top: 90 }} {...piece(0.06)}>
+        {/* Layer order follows Figma: panel, accent, header plate, then the frame on top. */}
+        <motion.div className="absolute" style={{ left: 18.18, top: 48.49 }} {...piece(0.06)}>
           <MobileFormPanel />
         </motion.div>
-        <motion.div className="absolute" style={{ left: 235.42, top: 26.67 }} {...piece(0.14)}>
+        <motion.div className="absolute" style={{ left: 270.53, top: 14.37 }} {...piece(0.14)}>
           <MobileFormDeco />
         </motion.div>
-        <motion.div className="absolute" style={{ left: 41.25, top: 34.17 }} {...piece(0.1)}>
+        <motion.div className="absolute" style={{ left: 22.23, top: 18.41 }} {...piece(0.1)}>
           <MobileFormHeaderBg />
         </motion.div>
+        <motion.div className="absolute left-0 top-0 pointer-events-none" {...piece(0)}>
+          <MobileFormFrame />
+        </motion.div>
 
-        <motion.div className="absolute" style={{ left: 74.2, top: 57.5 }} {...piece(0.18)}>
-          <h2 className="text-[13.333px] font-bold text-white leading-normal whitespace-nowrap">Let’s Contact</h2>
-          <p className="mt-[2px] w-[173px] text-[10px] font-bold text-white/80 leading-normal">
+        <motion.div className="absolute" style={{ left: 44.45, top: 26.49 }} {...piece(0.18)}>
+          <h2 className="text-[10.776px] font-bold text-white leading-normal whitespace-nowrap">Let’s Contact</h2>
+          <p className="mt-[3px] text-[7.184px] font-bold text-white/80 leading-normal whitespace-nowrap">
             Get in touch with us and let our Combined creativity shine.
           </p>
         </motion.div>
 
-        {/* 44px tap target centered on the 20.8x19.2 glyph at (336.5, 35.67) */}
+        {/* 44px tap target centered on the 12.6x11.7 glyph at (343.04, 17.96) */}
         <motion.button
           type="button"
           onClick={onClose}
           aria-label="Close"
           className="absolute flex items-center justify-center cursor-pointer z-10"
-          style={{ left: 324.9, top: 23.25, width: 44, height: 44 }}
+          style={{ left: 327.33, top: 1.8, width: 44, height: 44 }}
           whileTap={{ scale: 0.9 }}
           {...piece(0.14)}
         >
@@ -305,7 +310,7 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
         <motion.form
           onSubmit={handleSubmit}
           className="absolute flex flex-col gap-[13.333px]"
-          style={{ left: 55, top: 132.5, width: 286.667 }}
+          style={{ left: 55, top: 92.5, width: 286.667 }}
           {...piece(0.22)}
         >
           <MobileField error={errors.firstName}>
@@ -358,16 +363,22 @@ const ContactModal = ({ isOpen, onClose, onSubmit }) => {
             transition={{ duration: 0.2 }}
           >
             <motion.div
-              className="relative w-[min(90vw,638px)]"
+              className="@container relative w-[calc(100vw-20px)] sm:w-[min(90vw,638px)]"
               initial={{ clipPath: "inset(0 100% 0 0)" }}
               animate={{ clipPath: "inset(0 0% 0 0)" }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               {toast.type === "success" ? <ToastSucces /> : <ToastError />}
-              <div className="absolute inset-0 flex flex-col px-10 sm:px-16 pointer-events-none">
-                <h3 className="text-base sm:text-xl font-bold text-white leading-tight pt-1">{toast.title}</h3>
-                <p className="mt-1 sm:mt-1.5 text-[12px] sm:text-[16px] text-white/80 sm:text-nowrap pt-1 sm:pt-3">
+              {/* Mobile (Figma "Success/Error Message", 370 wide): text sized and placed in
+                  container units so it scales with the toast plate. */}
+              <div className="sm:hidden absolute inset-0 font-bold leading-normal whitespace-nowrap pointer-events-none">
+                <h3 className="absolute left-[10.19cqw] top-0 text-[3.762cqw] text-white">{toast.title}</h3>
+                <p className="absolute left-[10.19cqw] top-[9.09cqw] text-[2.508cqw] text-white/80">{toast.message}</p>
+              </div>
+              <div className="hidden sm:flex absolute inset-0 flex-col px-16 pointer-events-none">
+                <h3 className="text-xl font-bold text-white leading-tight pt-1">{toast.title}</h3>
+                <p className="mt-1.5 text-[16px] text-white/80 text-nowrap pt-3">
                   {toast.message}
                 </p>
               </div>

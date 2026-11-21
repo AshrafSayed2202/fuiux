@@ -1,8 +1,8 @@
-// Close glyph of the mobile contact form (Figma "X", 20.8 x 19.2).
+// Close glyph of the mobile contact form (Figma "X", 12.6 x 11.7).
 const MobileFormX = () => {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20.8333" height="19.1667" viewBox="0 0 20.8333 19.1667" fill="none">
-            <path d="M10.3969 6.84333L16.1613 0H20.8333L12.7132 9.61006L20.7807 19.1667H16.135L10.3969 12.3768L4.6852 19.1667H0.0263213L8.08065 9.61006L0 0H4.63255L10.3969 6.84333Z" fill="white" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="12" viewBox="0 0 13 12" fill="none">
+            <path d="M6.27424 4.16822L9.75286 0H12.5723L7.67204 5.85342L12.5405 11.6743H9.73698L6.27424 7.53862L2.82738 11.6743H0.0158841L4.87643 5.85342L0 0H2.79561L6.27424 4.16822Z" fill="white" />
         </svg>
     )
 }

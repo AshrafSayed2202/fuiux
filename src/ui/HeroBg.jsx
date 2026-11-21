@@ -9,6 +9,11 @@ import { MOBILE_CLIP } from "./heroConfig";
 
 import personDiffuse from "../assets/images/person-diffuse.png";
 import alphaMap from "../assets/images/AlphaMas.png";
+// 1.4x versions (2688x1330) of the color and cut-out textures. On phones the face is cropped
+// and enlarged, so the 1920px originals were magnified past their resolution. Only phones
+// download these; depth and normal maps are smooth and stay at the original size.
+import personDiffuseHd from "../assets/images/person-diffuse@1.4x.png";
+import alphaMapHd from "../assets/images/AlphaMas@1.4x.png";
 import depthMap from "../assets/images/depth.png";
 import normalMap from "../assets/images/normal.png";
 import helmetUrl from "../assets/images/helmet.glb?url";
@@ -78,6 +83,11 @@ const mixv = (a, b, m) => a + (b - a) * m;
 // Reveal effect (radius + trail length) is scaled down on small screens.
 const MOBILE_EFFECT_SCALE = 0.55;
 const MOBILE_QUERY = "(max-width: 639px)";
+// Render resolution. Phones have 2-3x pixel-dense screens, so rendering at 1x left the
+// canvas upscaled by the browser and the character looked blurry. Phones render at the
+// screen's density (capped at 2x to keep the reveal shader fast); larger screens stay at 1x.
+const MOBILE_MAX_PIXEL_RATIO = 2;
+const DESKTOP_PIXEL_RATIO = 1;
 const WIPE_MS = 900;
 // Time constants (seconds) for the reveal trail strength: how fast it builds while the
 // pointer moves and how slowly it fades once the pointer stops. Frame-rate independent.
@@ -298,7 +308,6 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover, touch
       alpha: false,
       powerPreference: "high-performance",
     });
-    renderer.setPixelRatio(1);
     renderer.setClearColor(0x090a0b, 1);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
@@ -427,10 +436,11 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover, touch
 
     async function init() {
       try {
+        const useHd = window.matchMedia(MOBILE_QUERY).matches;
         const [diffuse, depth, alpha, normal, loadedTop, loadedBottom] = await Promise.all([
-          loadTex(personDiffuse, false),
+          loadTex(useHd ? personDiffuseHd : personDiffuse, false),
           loadTex(depthMap),
-          loadTex(alphaMap),
+          loadTex(useHd ? alphaMapHd : alphaMap),
           loadTex(normalMap),
           loadTex(topBg, false),
           loadTex(bottomBg, true),
@@ -600,6 +610,10 @@ export default function HeroBg({ mouseEnabled, scrollYProgress, maskHover, touch
     function resize() {
       const w = canvas.clientWidth || window.innerWidth;
       const h = canvas.clientHeight || window.innerHeight;
+      const isPhone = window.matchMedia(MOBILE_QUERY).matches;
+      renderer.setPixelRatio(
+        isPhone ? Math.min(window.devicePixelRatio || 1, MOBILE_MAX_PIXEL_RATIO) : DESKTOP_PIXEL_RATIO
+      );
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       if (camera.aspect < PORTRAIT_MAX_ASPECT) {
